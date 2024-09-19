@@ -12,9 +12,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.JJikgo"
         tools:targetApi="31">
-        <activity
-            android:name=".activities.MypageActivity"
-            android:exported="false" />
+
         <activity
             android:name=".activities.SignupActivity"
             android:exported="false" />

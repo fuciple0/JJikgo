@@ -9,11 +9,7 @@
     android:background="@color/white">
 
 
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/map"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:name="com.naver.maps.map.MapFragment" />
+
 
     <FrameLayout
         android:id="@+id/fragment_container"
