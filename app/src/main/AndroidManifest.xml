@@ -13,7 +13,22 @@
         android:theme="@style/Theme.JJikgo"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MypageActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.SignupActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.EmailLoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.LoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.IntroActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
