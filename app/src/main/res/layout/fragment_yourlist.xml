@@ -9,6 +9,8 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:textSize="24dp"
+        android:layout_marginTop="100dp"
+        android:text="추천리스트 프래그먼트" />
 
 </FrameLayout>

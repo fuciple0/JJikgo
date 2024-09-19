@@ -37,6 +37,11 @@
             android:name=".activities.MainActivity"
             android:exported="false"/>
 
+        <!-- 네이버 맵 api 클라이언트 아이디 등록       -->
+        <meta-data
+            android:name="com.naver.maps.map.CLIENT_ID"
+            android:value="sj5n0ymdfc" />
+
 
     </application>
 

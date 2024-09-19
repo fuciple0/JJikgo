@@ -3,15 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.MylistFragment">
+    tools:context=".fragments.MypageFragment">
 
     <!-- TODO: Update blank fragment layout -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="150dp"
-        android:textSize="24sp"
-        android:text="Mylist 프래그먼트"
-        android:background="#2196F3"/>
+        android:text="마에페이지 프레그먼트"
+        android:textSize="32dp"
+        android:background="@color/white"/>
 
 </FrameLayout>
