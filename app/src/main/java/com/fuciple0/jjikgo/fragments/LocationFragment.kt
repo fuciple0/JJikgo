@@ -15,10 +15,15 @@ class LocationFragment : Fragment() {
     lateinit var binding : FragmentLocationBinding
     lateinit var naverMap: NaverMap
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
+
     }
+
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,8 +43,15 @@ class LocationFragment : Fragment() {
                 fm.beginTransaction().add(R.id.map, it).commit()
             }
 
+        binding.addMemoFab.setOnClickListener { showAddMemoBottomSheet() }
 
     }
+
+    private fun showAddMemoBottomSheet() {
+        val addMemoFragment = AddmemoFragment()
+        addMemoFragment.show(childFragmentManager,"AddMemoBottomSheet")
+    }
+
 
 
 }
