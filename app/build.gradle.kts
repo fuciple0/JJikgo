@@ -53,4 +53,7 @@ dependencies {
     // 네이버 지도 SDK
     implementation("com.naver.maps:map-sdk:3.19.1")
 
+    // 카카오 로그인 API 모듈
+    implementation("com.kakao.sdk:v2-user:2.20.6")
+
 }
