@@ -13,16 +13,33 @@
         android:layout_height="match_parent"
         android:name="com.naver.maps.map.MapFragment" />
 
+
     <EditText
         android:id="@+id/input"
         android:layout_width="300dp"
         android:layout_height="50dp"
         android:hint=" 장소, 주소 검색 "
-        android:layout_margin="16dp"
-        android:background="@color/white"
-        android:elevation="4dp"
-
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="24dp"
+        android:background="@drawable/edit_box"
+        android:elevation="5dp"
+        android:paddingLeft="16dp"
         />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/mylocation_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#FFFFFF"
+        android:src="@drawable/baseline_my_location_24"
+        app:maxImageSize="35dp"
+        app:fabCustomSize="50dp"
+        android:elevation="5dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="24dp"
+        />
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/add_memo_fab"
@@ -31,7 +48,7 @@
         style="@style/Widget.MaterialComponents.FloatingActionButton"
         app:tint = "#FFFFFF"
         android:backgroundTint="#2B5CBF"
-        android:src="@drawable/icon_edit"
+        android:src="@drawable/baseline_add_24"
         app:fabSize="normal"
         app:maxImageSize="35dp"
         app:borderWidth="0dp"
