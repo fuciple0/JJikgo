@@ -19,8 +19,6 @@ class LocationFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-
-
     }
 
 
@@ -37,11 +35,15 @@ class LocationFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         // MapFragment를 다른 프래그먼트 내에 배치하는 예제
-        val fm = childFragmentManager
-        val mapFragment = fm.findFragmentById(R.id.map) as MapFragment?
-            ?: MapFragment.newInstance().also {
-                fm.beginTransaction().add(R.id.map, it).commit()
-            }
+//        val fm = childFragmentManager
+//        val mapFragment = fm.findFragmentById(R.id.map) as MapFragment?
+//            ?: MapFragment.newInstance().also {
+//                fm.beginTransaction().add(R.id.map, it).commit()
+//            }
+
+
+
+
 
         binding.addMemoFab.setOnClickListener { showAddMemoBottomSheet() }
 

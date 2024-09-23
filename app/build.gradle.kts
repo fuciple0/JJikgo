@@ -56,4 +56,7 @@ dependencies {
     // 카카오 로그인 API 모듈
     implementation("com.kakao.sdk:v2-user:2.20.6")
 
+    //글라이드
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+
 }
