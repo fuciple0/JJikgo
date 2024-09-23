@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.LoginActivity"
+    android:background="@color/white">
+
+    <TextView
+        android:id="@+id/tv_go"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="둘러보기"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="30dp"
+        android:layout_marginRight="20dp"
+        android:textColor="#6B6B6B"
+        />
+
+    <ImageView
+        android:id="@+id/title"
+        android:layout_width="270dp"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:src="@drawable/jjikgo_logo"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="100dp"
+        android:padding="8dp"
+        />
+
+    <!--    화면 밑에서부터 배치 하기-->
+    <TextView
+        android:id="@+id/btn_signup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="회원가입"
+        android:textColor="@color/black"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="80dp"
+        android:background="@drawable/bg_box"
+        android:padding="8dp"
+        android:gravity="center"
+        android:layout_marginLeft="80dp"
+        android:layout_marginRight="80dp"
+        />
+
+    <LinearLayout
+        android:id="@+id/btn_login_email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:gravity="center"
+        android:background="@drawable/bg_box"
+        android:layout_marginLeft="80dp"
+        android:layout_marginRight="80dp"
+        android:layout_above="@id/btn_signup"
+        android:layout_marginBottom="16dp"
+        >
+
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/baseline_email_24" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="이메일로 로그인"
+            android:textColor="@color/black"
+            android:layout_marginLeft="8dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_login_btn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_above="@+id/btn_login_email"
+        android:layout_marginBottom="16dp"
+        >
+        <ImageView
+            android:id="@+id/btn_login_kakao"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/icon_kakako"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            />
+        <ImageView
+            android:id="@+id/btn_login_google"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/icon_google"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            />
+        <ImageView
+            android:id="@+id/btn_login_naver"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/icon_naver"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="간편하게 로그인 하기"
+        android:layout_above="@id/layout_login_btn"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp"/>
+
+
+</RelativeLayout>

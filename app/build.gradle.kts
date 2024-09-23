@@ -33,6 +33,8 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
+    buildFeatures.viewBinding = true
 }
 
 dependencies {
@@ -42,7 +44,19 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.circleimageview)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+
+
+    // 네이버 지도 SDK
+    implementation("com.naver.maps:map-sdk:3.19.1")
+
+    // 카카오 로그인 API 모듈
+    implementation("com.kakao.sdk:v2-user:2.20.6")
+
+    //글라이드
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+
 }

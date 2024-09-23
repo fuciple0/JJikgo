@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@color/white">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="새로운 메모"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/baseline_add_location_24"
+            />
+        <TextView
+            android:id="@+id/address_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="서울 성동구 성수동 2가 284-50"
+            android:textSize="15sp"
+            android:layout_marginBottom="16dp"/>
+
+    </LinearLayout>
+
+    <RatingBar
+        android:id="@+id/rating_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:progressTint="#2B5CBF"
+        android:stepSize="1.0"
+        android:layout_gravity="center"
+        />
+
+
+    <ImageView
+        android:id="@+id/memo_image"
+        android:layout_width="230dp"
+        android:layout_height="140dp"
+        android:src="@drawable/add_camera3"
+        android:layout_gravity="center"
+        android:adjustViewBounds="true"
+        android:scaleType="centerInside"
+        />
+
+
+    <EditText
+        android:id="@+id/memoEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="추억을 메모하세요"
+        android:padding="8dp"
+        android:inputType="textMultiLine"
+        android:background="@drawable/bg_box"
+        android:layout_margin="16dp"
+
+        android:minLines="3"/>
+
+
+
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+    >
+
+        <Button
+            android:id="@+id/saveMemoButton1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="내 기기에만 저장"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/white"
+            android:backgroundTint="#868686"
+            android:layout_weight="1"
+            android:layout_margin="4dp"/>
+
+        <Button
+            android:id="@+id/saveMemoButton2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="다른 사람과 공유"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/white"
+            android:backgroundTint="#2B5CBF"
+            android:layout_weight="1"
+            android:layout_margin="4dp"/>
+
+    </LinearLayout>
+
+
+
+</LinearLayout>

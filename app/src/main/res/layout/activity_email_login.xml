@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.EmailLoginActivity"
+    android:orientation="vertical"
+    android:background="@color/white">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:title="로그인"
+        app:navigationIcon="@drawable/ic_action_back"
+        />
+
+
+    <ImageView
+        android:id="@+id/title"
+        android:layout_width="270dp"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:src="@drawable/jjikgo_logo"
+        android:layout_gravity="center"
+        android:layout_marginTop="100dp"
+        android:padding="8dp"
+        />
+
+
+
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/input_email"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:hint="이메일"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        >
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/input_pw"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        app:passwordToggleEnabled="true"
+        android:hint="비밀번호"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        >
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+    <Button
+        android:id="@+id/btn"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:text="로그인"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#2B5CBF"
+        android:textSize="16sp"
+        />
+
+</LinearLayout>
