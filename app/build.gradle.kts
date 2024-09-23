@@ -45,6 +45,9 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.circleimageview)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.converter.scalars)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -53,10 +56,15 @@ dependencies {
     // 네이버 지도 SDK
     implementation("com.naver.maps:map-sdk:3.19.1")
 
+    // 네이버 간편 로그인
+    implementation("com.navercorp.nid:oauth:5.10.0") // jdk 11
+
     // 카카오 로그인 API 모듈
     implementation("com.kakao.sdk:v2-user:2.20.6")
 
     //글라이드
     implementation("com.github.bumptech.glide:glide:4.16.0")
+
+
 
 }

@@ -2,15 +2,25 @@ package com.fuciple0.jjikgo.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.fuciple0.jjikgo.R
+import com.fuciple0.jjikgo.data.NaverUserInfoResponse
 import com.fuciple0.jjikgo.databinding.ActivityLoginBinding
+import com.fuciple0.jjikgo.network.RetrofitHelper
+import com.fuciple0.jjikgo.network.RetrofitService
 import com.kakao.sdk.auth.model.OAuthToken
 import com.kakao.sdk.user.UserApiClient
+import com.navercorp.nid.NaverIdLoginSDK
+import com.navercorp.nid.oauth.OAuthLoginCallback
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class LoginActivity : AppCompatActivity() {
 
@@ -53,8 +63,79 @@ class LoginActivity : AppCompatActivity() {
     }//onCreate
 
     private fun loginNaver() {
+        // 1. 네이버 개발자 사이트에서 앱 등록 및 라이브러리 추가
+        // 2. 네이버 아이디 로그인(네아로) SDK 초기화
+        NaverIdLoginSDK.initialize(this, "OLjoucgqFdPqX2hTFjG0", "Yh_OWOJA1y", "찍고")
+
+        // 3. 로그인 작업 수행
+        NaverIdLoginSDK.authenticate(this, object : OAuthLoginCallback {
+            override fun onError(errorCode: Int, message: String) {
+                Toast.makeText(this@LoginActivity, "에러 발생:${message}", Toast.LENGTH_SHORT).show()
+            }
+            override fun onFailure(httpStatus: Int, message: String) {
+                Toast.makeText(this@LoginActivity, "로그인 실패:${message}", Toast.LENGTH_SHORT).show()
+            }
+            override fun onSuccess() {
+                Toast.makeText(this@LoginActivity, "로그인 성공", Toast.LENGTH_SHORT).show()
+                // 1차적으로 로그인 작업 완료.
+                // 이제 회원 프로필 정보를 얻어와야 하는데,
+                // 회원 프로필 정보는  REST API를 이용하여 요청하고 응답 받아야 한다. (회원 프로필 조회 API 명세 - 확인)
+                val accessToken:String? = NaverIdLoginSDK.getAccessToken()
+
+                // 토큰번호가 잘 오는지 확인
+                Log.i("Token", "${accessToken}")
+
+                // 레트로핏 작업을 위해서 사용자 정보 가져오기..(API 명세 - 확인)
+                val retrofit = RetrofitHelper.getRetrofitInstance("https://openapi.naver.com")
+
+                //RetrofitService 인터페이스 작성
+                val retrofitService = retrofit.create(RetrofitService::class.java)
+                val call = retrofitService.getNaverUserInfo("Bearer $accessToken")
+
+                call.enqueue(object : Callback<NaverUserInfoResponse> {
+                    override fun onResponse(
+                        p0: Call<NaverUserInfoResponse>,
+                        p1: Response<NaverUserInfoResponse>
+                    ) {
+                       //응답 객체 p1으로부터, 받은 결과를(json데이터)를 NaverUserInfoResponse로 분석한 결과 받기
+                        val userInfo = p1.body()
+                        val id: String = userInfo?.response?.id ?: ""
+                        val email:String = userInfo?.response?.email ?: ""
+                        val nickname: String = userInfo?.response?.nickname ?: ""
+                        val profile_image: String = userInfo?.response?.profile_image ?: ""
+
+//                        val message = """
+//                            ID: $id
+//                            Email: $email
+//                            Nickname: $nickname
+//                            Profile Image URL: $profile_image
+//                        """.trimIndent()
+//
+//                        AlertDialog.Builder(this@LoginActivity)
+//                            .setTitle("네이버 사용자 정보")
+//                            .setMessage(message)
+//                            .setPositiveButton("확인") { dialog, _ ->
+//                                dialog.dismiss()
+//                            }
+//                            .create()
+//                            .show()
+
+                        // 로그인 했으니 메인 화면으로 이동
+                        startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+                        finish()
+
+                    }
+
+                    override fun onFailure(p0: Call<NaverUserInfoResponse>, p1: Throwable) {
+                        Toast.makeText(this@LoginActivity, "회원정보 불러오기 실패 : ${p1.message}", Toast.LENGTH_SHORT).show()
+                    }
+                })
 
 
+
+
+            }
+        })
 
 
     }
@@ -64,8 +145,8 @@ class LoginActivity : AppCompatActivity() {
 
         // 로그인 조합 예제
 
-// 카카오계정으로 로그인 공통 callback 구성
-// 카카오톡으로 로그인 할 수 없어 카카오계정으로 로그인할 경우 사용됨
+        // 카카오계정으로 로그인 공통 callback 구성
+        // 카카오톡으로 로그인 할 수 없어 카카오계정으로 로그인할 경우 사용됨
         val callback: (OAuthToken?, Throwable?) -> Unit = { token, error ->
             if (error != null) {
                 Toast.makeText(this, "카카오계정으로 로그인 실패", Toast.LENGTH_SHORT).show()
