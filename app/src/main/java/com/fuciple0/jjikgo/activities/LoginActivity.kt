@@ -47,7 +47,17 @@ class LoginActivity : AppCompatActivity() {
         // 카카오 로그인 버튼
         binding.btnLoginKakao.setOnClickListener { loginKaKao() }
 
+        // 네이버 로그인 버튼
+        binding.btnLoginNaver.setOnClickListener { loginNaver() }
+
     }//onCreate
+
+    private fun loginNaver() {
+
+
+
+
+    }
 
     private fun loginKaKao() {
         // 카카오 로그인 api 라이브러리 추가하기.
