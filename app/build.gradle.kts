@@ -55,6 +55,9 @@ dependencies {
 
     // 네이버 지도 SDK
     implementation("com.naver.maps:map-sdk:3.19.1")
+    // Google Play Services - 위치 서비스
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+
 
     // 네이버 간편 로그인
     implementation("com.navercorp.nid:oauth:5.10.0") // jdk 11
