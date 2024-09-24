@@ -112,15 +112,8 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
             // 터치한 위치로 카메라 이동
             naverMap.moveCamera(CameraUpdate.scrollTo(coord))
 
-            // 좌표 기반으로 주소 가져오기
-            val geocoder = Geocoder(requireContext(), Locale.getDefault())
-            val addressList = geocoder.getFromLocation(coord.latitude, coord.longitude, 1)
-            addressMemo = if (!addressList.isNullOrEmpty()) {
-                addressList[0].getAddressLine(0) // 첫 번째 주소 라인 가져오기
-            } else {
-                "주소를 찾을 수 없습니다."
-            }
-            Log.i("addressMemo", addressMemo)
+            // 주소 업데이트
+            updateAddressMemo(coord)
 
         }
     }
@@ -180,15 +173,8 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
                 // 현재 위치로 카메라 이동
                 naverMap.moveCamera(CameraUpdate.scrollTo(currentLatLng))
 
-                // 좌표 기반으로 주소 가져오기
-                val geocoder = Geocoder(requireContext(), Locale.getDefault())
-                val addressList = geocoder.getFromLocation(currentLatLng.latitude, currentLatLng.longitude, 1)
-                addressMemo = if (!addressList.isNullOrEmpty()) {
-                    addressList[0].getAddressLine(0) // 첫 번째 주소 라인 가져오기
-                } else {
-                    "주소를 찾을 수 없습니다."
-                }
-                Log.i("addressMemo", addressMemo)
+                // 주소 업데이트
+                updateAddressMemo(currentLatLng)
 
                 // 좌표를 Toast로 출력
                 Toast.makeText(
@@ -200,6 +186,18 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
                 Toast.makeText(context, "현재 위치를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    // 좌표 기반으로 주소 가져와서 addressMemo 값 저장
+    private fun updateAddressMemo(latLng: LatLng) {
+        val geocoder = Geocoder(requireContext(), Locale.getDefault())
+        val addressList = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)
+        addressMemo = if (!addressList.isNullOrEmpty()) {
+            addressList[0].getAddressLine(0) // 첫 번째 주소 라인 가져오기
+        } else {
+            "주소를 찾을 수 없습니다."
+        }
+        Log.i("addressMemo", addressMemo)
     }
 
 
