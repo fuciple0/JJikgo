@@ -2,8 +2,10 @@ package com.fuciple0.jjikgo.fragments
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,14 +23,17 @@ import com.naver.maps.map.OnMapReadyCallback
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.util.FusedLocationSource
 import com.naver.maps.map.util.MarkerIcons
+import java.util.Locale
 
 class LocationFragment : Fragment(), OnMapReadyCallback {
+
 
     private lateinit var binding: FragmentLocationBinding
     private lateinit var naverMap: NaverMap
     private lateinit var locationSource: FusedLocationSource
     private lateinit var fusedLocationClient: com.google.android.gms.location.FusedLocationProviderClient
 
+    private lateinit var addressMemo: String
     private var currentLocationMarker: Marker? = null
     private var userMarker: Marker? = null
 
@@ -56,8 +61,20 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
             checkLocationPermissionAndUpdateLocation()
         }
 
+        // FloatingActionButton 클릭 이벤트
+        binding.addMemoFab.setOnClickListener { showAddMemoBottomSheet(addressMemo) }
+
         return binding.root
     }
+
+    private fun showAddMemoBottomSheet(addressMemo:String) {
+    val addMemoFragment = AddmemoFragment()
+    val bundle = Bundle()
+    bundle.putString("addressMemo", addressMemo)
+    addMemoFragment.arguments = bundle
+    addMemoFragment.show(childFragmentManager, "AddMemoBottomSheet")
+}
+
 
     // 네이버 맵이 준비되면 호출되는 콜백 함수
     override fun onMapReady(naverMap: NaverMap) {
@@ -94,8 +111,25 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
 
             // 터치한 위치로 카메라 이동
             naverMap.moveCamera(CameraUpdate.scrollTo(coord))
+
+            // 좌표 기반으로 주소 가져오기
+            val geocoder = Geocoder(requireContext(), Locale.getDefault())
+            val addressList = geocoder.getFromLocation(coord.latitude, coord.longitude, 1)
+            addressMemo = if (!addressList.isNullOrEmpty()) {
+                addressList[0].getAddressLine(0) // 첫 번째 주소 라인 가져오기
+            } else {
+                "주소를 찾을 수 없습니다."
+            }
+            Log.i("addressMemo", addressMemo)
+
         }
     }
+
+
+
+
+
+
 
     // 위치 권한을 확인하고 업데이트하는 메서드
     private fun checkLocationPermissionAndUpdateLocation() {
@@ -145,6 +179,16 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
 
                 // 현재 위치로 카메라 이동
                 naverMap.moveCamera(CameraUpdate.scrollTo(currentLatLng))
+
+                // 좌표 기반으로 주소 가져오기
+                val geocoder = Geocoder(requireContext(), Locale.getDefault())
+                val addressList = geocoder.getFromLocation(currentLatLng.latitude, currentLatLng.longitude, 1)
+                addressMemo = if (!addressList.isNullOrEmpty()) {
+                    addressList[0].getAddressLine(0) // 첫 번째 주소 라인 가져오기
+                } else {
+                    "주소를 찾을 수 없습니다."
+                }
+                Log.i("addressMemo", addressMemo)
 
                 // 좌표를 Toast로 출력
                 Toast.makeText(
