@@ -12,7 +12,9 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import com.bumptech.glide.Glide
 import com.fuciple0.jjikgo.R
+import com.fuciple0.jjikgo.data.MemoDatabaseHelper
 import com.fuciple0.jjikgo.databinding.FragmentLocationBinding
 import com.google.android.gms.location.LocationServices
 import com.naver.maps.geometry.LatLng
@@ -27,13 +29,16 @@ import java.util.Locale
 
 class LocationFragment : Fragment(), OnMapReadyCallback {
 
-
+    private lateinit var dbHelper: MemoDatabaseHelper // dbHelper 선언
     private lateinit var binding: FragmentLocationBinding
     private lateinit var naverMap: NaverMap
     private lateinit var locationSource: FusedLocationSource
     private lateinit var fusedLocationClient: com.google.android.gms.location.FusedLocationProviderClient
 
     private lateinit var addressMemo: String
+    private lateinit var x: String
+    private lateinit var y: String
+
     private var currentLocationMarker: Marker? = null
     private var userMarker: Marker? = null
 
@@ -48,6 +53,7 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentLocationBinding.inflate(inflater, container, false)
+        dbHelper = MemoDatabaseHelper(requireContext()) // 여기서 초기화
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.map) as MapFragment?
             ?: MapFragment.newInstance().also {
@@ -71,6 +77,8 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
     val addMemoFragment = AddmemoFragment()
     val bundle = Bundle()
     bundle.putString("addressMemo", addressMemo)
+    bundle.putString("x", x)
+    bundle.putString("y", y)
     addMemoFragment.arguments = bundle
     addMemoFragment.show(childFragmentManager, "AddMemoBottomSheet")
 }
@@ -86,6 +94,40 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
 
         // 처음 앱 실행 시 위치 권한을 확인하고 현재 위치로 지도 이동 및 마커 추가
         checkLocationPermissionAndUpdateLocation()
+
+        // DB에서 저장된 메모(좌표 및 이미지) 가져오기
+        val savedMemos = dbHelper.getAllMemos()
+
+        // 저장된 메모들로 마커 추가
+        savedMemos.forEach { memo ->
+            val latitude = memo.y.toDouble()
+            val longitude = memo.x.toDouble()
+            val coord = LatLng(latitude, longitude)
+
+            // 마커 생성 및 이미지 설정
+            val marker = Marker().apply {
+                position = coord
+                icon = MarkerIcons.BLACK // 기본 마커 설정 후 이미지로 교체
+                map = naverMap
+            }
+
+            // Glide를 사용하여 마커에 이미지 설정
+            Glide.with(this)
+                .asBitmap()
+                .load(memo.imagePath) // DB에 저장된 이미지 경로를 사용
+                .into(object : com.bumptech.glide.request.target.CustomTarget<android.graphics.Bitmap>() {
+                    override fun onResourceReady(
+                        resource: android.graphics.Bitmap,
+                        transition: com.bumptech.glide.request.transition.Transition<in android.graphics.Bitmap>?
+                    ) {
+                        marker.icon = com.naver.maps.map.overlay.OverlayImage.fromBitmap(resource)
+                    }
+
+                    override fun onLoadCleared(placeholder: android.graphics.drawable.Drawable?) {
+                        // 필요 시 처리
+                    }
+                })
+        }
 
         // 사용자가 지도를 터치할 때 마커를 추가하는 리스너
         naverMap.setOnMapClickListener { _, coord ->
@@ -114,9 +156,9 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
 
             // 주소 업데이트
             updateAddressMemo(coord)
-
         }
     }
+
 
 
 
@@ -190,6 +232,10 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
 
     // 좌표 기반으로 주소 가져와서 addressMemo 값 저장
     private fun updateAddressMemo(latLng: LatLng) {
+
+        x = latLng.longitude.toString() // 경도가 x 좌표
+        y = latLng.latitude.toString()  // 위도가 y 좌표
+
         val geocoder = Geocoder(requireContext(), Locale.getDefault())
         val addressList = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)
         addressMemo = if (!addressList.isNullOrEmpty()) {

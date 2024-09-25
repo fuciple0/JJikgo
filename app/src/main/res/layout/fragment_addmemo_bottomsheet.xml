@@ -65,7 +65,6 @@
         android:inputType="textMultiLine"
         android:background="@drawable/bg_box"
         android:layout_margin="16dp"
-
         android:minLines="3"/>
 
 
