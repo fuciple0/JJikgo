@@ -106,27 +106,31 @@ class AddmemoFragment : BottomSheetDialogFragment() {
         val rating = binding.ratingBar.rating
         val memoText = binding.memoEditText.text.toString()
 
-        // 이미지 경로
-        val imagePath = imgPath
+        // 이미지 경로가 null일 경우 기본 이미지 설정
+        val imagePath = imgPath ?: getDefaultImagePath()
 
-        if (address.isNotEmpty() && memoText.isNotEmpty() && imagePath != null) {
+        if (address.isNotEmpty() && memoText.isNotEmpty()) {
             val id = dbHelper.insertMemo(address, rating, imagePath, memoText, x, y)
             G.userlocation = LatLng(y!!.toDouble(), x!!.toDouble())
-
-            //Toast.makeText(context, "현재 위치 - 위도: ${G.userlocation!!.latitude}, 경도: ${G.userlocation!!.longitude}", Toast.LENGTH_SHORT).show()
 
             if (id != -1L) {
                 Toast.makeText(requireContext(), "메모가 저장되었습니다!", Toast.LENGTH_SHORT).show()
                 dismiss() // 저장 후 바텀시트 닫기
-                (context as MainActivity).binding.bnv.selectedItemId=R.id.bnv_menu_location
-
+                (context as MainActivity).binding.bnv.selectedItemId = R.id.bnv_menu_location
             } else {
                 Toast.makeText(requireContext(), "저장 실패!", Toast.LENGTH_SHORT).show()
             }
         } else {
-            Toast.makeText(requireContext(), "모든 필드를 입력하세요.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "모든 내용을 입력해주세요.", Toast.LENGTH_SHORT).show()
         }
     }
+
+    // 기본 이미지 경로를 반환하는 함수
+    private fun getDefaultImagePath(): String {
+        // drawable 리소스 경로를 URI 형식으로 반환
+        return "android.resource://${requireContext().packageName}/${R.drawable.no_image}"
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
