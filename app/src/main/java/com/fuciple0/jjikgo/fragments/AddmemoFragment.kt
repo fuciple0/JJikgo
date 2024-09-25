@@ -14,10 +14,13 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import com.bumptech.glide.Glide
+import com.fuciple0.jjikgo.G
 import com.fuciple0.jjikgo.R
+import com.fuciple0.jjikgo.activities.MainActivity
 import com.fuciple0.jjikgo.data.MemoDatabaseHelper
 import com.fuciple0.jjikgo.databinding.FragmentAddmemoBottomsheetBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.naver.maps.geometry.LatLng
 import java.io.File
 
 class AddmemoFragment : BottomSheetDialogFragment() {
@@ -107,10 +110,16 @@ class AddmemoFragment : BottomSheetDialogFragment() {
         val imagePath = imgPath
 
         if (address.isNotEmpty() && memoText.isNotEmpty() && imagePath != null) {
-            val id = dbHelper.insertMemo(address, rating, imagePath, memoText, x, y) // x, y 좌표 추가
+            val id = dbHelper.insertMemo(address, rating, imagePath, memoText, x, y)
+            G.userlocation = LatLng(y!!.toDouble(), x!!.toDouble())
+
+            //Toast.makeText(context, "현재 위치 - 위도: ${G.userlocation!!.latitude}, 경도: ${G.userlocation!!.longitude}", Toast.LENGTH_SHORT).show()
+
             if (id != -1L) {
                 Toast.makeText(requireContext(), "메모가 저장되었습니다!", Toast.LENGTH_SHORT).show()
                 dismiss() // 저장 후 바텀시트 닫기
+                (context as MainActivity).binding.bnv.selectedItemId=R.id.bnv_menu_location
+
             } else {
                 Toast.makeText(requireContext(), "저장 실패!", Toast.LENGTH_SHORT).show()
             }

@@ -1,6 +1,7 @@
 package com.fuciple0.jjikgo.fragments
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.location.Geocoder
@@ -14,6 +15,7 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
+import com.fuciple0.jjikgo.G
 import com.fuciple0.jjikgo.R
 import com.fuciple0.jjikgo.data.CircleImageTransform
 import com.fuciple0.jjikgo.data.MemoDatabaseHelper
@@ -76,7 +78,8 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun setupClickListeners() {
-        binding.mylocationFab.setOnClickListener { checkLocationPermissionAndUpdateLocation() }
+        //binding.mylocationFab.setOnClickListener { checkLocationPermissionAndUpdateLocation() }
+        binding.mylocationFab.setOnClickListener { updateCurrentLocation() }
         binding.addMemoFab.setOnClickListener { showAddMemoBottomSheet() }
     }
 
@@ -124,10 +127,9 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
             .transform(CircleImageTransform()) // 원형 변환기 적용
             .into(object : com.bumptech.glide.request.target.CustomTarget<Bitmap>() {
                 override fun onResourceReady(resource: Bitmap, transition: com.bumptech.glide.request.transition.Transition<in Bitmap>?) {
-                    val resizedBitmap = Bitmap.createScaledBitmap(resource, 100, 100, false)
+                    val resizedBitmap = Bitmap.createScaledBitmap(resource, 85, 85, false)
                     marker.icon = OverlayImage.fromBitmap(resizedBitmap)
                 }
-
                 override fun onLoadCleared(placeholder: android.graphics.drawable.Drawable?) {}
             })
 
@@ -161,6 +163,14 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
     // 현재 위치를 갱신하고 마커를 추가하는 메서드
     private fun updateCurrentLocation() {
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return
+        }
+        // 메모바텀시트에서 메모를 입력하면, 메모입력지 기준으로 카메라 이동
+        if(G.userlocation!=null) {
+            naverMap.moveCamera(CameraUpdate.scrollTo(G.userlocation!!))
+            G.userlocation = null // 다시 널값으로 만들어주기
+
+            Toast.makeText(context, "${G.userlocation}", Toast.LENGTH_SHORT).show()
             return
         }
 
