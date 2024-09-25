@@ -2,6 +2,7 @@ package com.fuciple0.jjikgo.fragments
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
@@ -14,6 +15,7 @@ import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.fuciple0.jjikgo.R
+import com.fuciple0.jjikgo.data.CircleImageTransform
 import com.fuciple0.jjikgo.data.MemoDatabaseHelper
 import com.fuciple0.jjikgo.databinding.FragmentLocationBinding
 import com.google.android.gms.location.LocationServices
@@ -23,24 +25,28 @@ import com.naver.maps.map.MapFragment
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.OnMapReadyCallback
 import com.naver.maps.map.overlay.Marker
+import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.util.FusedLocationSource
 import com.naver.maps.map.util.MarkerIcons
 import java.util.Locale
 
 class LocationFragment : Fragment(), OnMapReadyCallback {
 
-    private lateinit var dbHelper: MemoDatabaseHelper // dbHelper 선언
+    private lateinit var dbHelper: MemoDatabaseHelper
     private lateinit var binding: FragmentLocationBinding
     private lateinit var naverMap: NaverMap
     private lateinit var locationSource: FusedLocationSource
     private lateinit var fusedLocationClient: com.google.android.gms.location.FusedLocationProviderClient
 
-    private lateinit var addressMemo: String
-    private lateinit var x: String
-    private lateinit var y: String
-
     private var currentLocationMarker: Marker? = null
     private var userMarker: Marker? = null
+    private var addressMemo: String = ""
+    private var x: String = ""
+    private var y: String = ""
+
+    companion object {
+        private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,178 +59,130 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentLocationBinding.inflate(inflater, container, false)
-        dbHelper = MemoDatabaseHelper(requireContext()) // 여기서 초기화
+        dbHelper = MemoDatabaseHelper(requireContext())
 
-        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as MapFragment?
-            ?: MapFragment.newInstance().also {
-                childFragmentManager.beginTransaction().add(R.id.map, it).commit()
-            }
-
-        mapFragment.getMapAsync(this)
-
-        // 플로팅 액션 버튼 클릭 리스너 설정
-        binding.mylocationFab.setOnClickListener {
-            checkLocationPermissionAndUpdateLocation()
-        }
-
-        // FloatingActionButton 클릭 이벤트
-        binding.addMemoFab.setOnClickListener { showAddMemoBottomSheet(addressMemo) }
+        setupMapFragment()
+        setupClickListeners()
 
         return binding.root
     }
 
-    private fun showAddMemoBottomSheet(addressMemo:String) {
-    val addMemoFragment = AddmemoFragment()
-    val bundle = Bundle()
-    bundle.putString("addressMemo", addressMemo)
-    bundle.putString("x", x)
-    bundle.putString("y", y)
-    addMemoFragment.arguments = bundle
-    addMemoFragment.show(childFragmentManager, "AddMemoBottomSheet")
-}
+    private fun setupMapFragment() {
+        val mapFragment = childFragmentManager.findFragmentById(R.id.map) as MapFragment?
+            ?: MapFragment.newInstance().also {
+                childFragmentManager.beginTransaction().add(R.id.map, it).commit()
+            }
+        mapFragment.getMapAsync(this)
+    }
+
+    private fun setupClickListeners() {
+        binding.mylocationFab.setOnClickListener { checkLocationPermissionAndUpdateLocation() }
+        binding.addMemoFab.setOnClickListener { showAddMemoBottomSheet() }
+    }
+
+    private fun showAddMemoBottomSheet() {
+        val addMemoFragment = AddmemoFragment()
+        val bundle = Bundle().apply {
+            putString("addressMemo", addressMemo)
+            putString("x", x)
+            putString("y", y)
+        }
+        addMemoFragment.arguments = bundle
+        addMemoFragment.show(childFragmentManager, "AddMemoBottomSheet")
+    }
 
 
     // 네이버 맵이 준비되면 호출되는 콜백 함수
     override fun onMapReady(naverMap: NaverMap) {
         this.naverMap = naverMap
         naverMap.locationSource = locationSource
-
-        // UI 설정: 사용자 위치 버튼 비활성화
         naverMap.uiSettings.isLocationButtonEnabled = false
 
-        // 처음 앱 실행 시 위치 권한을 확인하고 현재 위치로 지도 이동 및 마커 추가
         checkLocationPermissionAndUpdateLocation()
+        loadSavedMemos()
+        setupMapClickListener()
+    }
 
-        // DB에서 저장된 메모(좌표 및 이미지) 가져오기
+    private fun loadSavedMemos() {
         val savedMemos = dbHelper.getAllMemos()
-
-        // 저장된 메모들로 마커 추가
         savedMemos.forEach { memo ->
-            val latitude = memo.y.toDouble()
-            val longitude = memo.x.toDouble()
-            val coord = LatLng(latitude, longitude)
+            addMarkerForMemo(memo)
+        }
+    }
 
-            // 마커 생성 및 이미지 설정
-            val marker = Marker().apply {
-                position = coord
-                icon = MarkerIcons.BLACK // 기본 마커 설정 후 이미지로 교체
-                map = naverMap
-            }
-
-            // Glide를 사용하여 마커에 이미지 설정
-            Glide.with(this)
-                .asBitmap()
-                .load(memo.imagePath) // DB에 저장된 이미지 경로를 사용
-                .into(object : com.bumptech.glide.request.target.CustomTarget<android.graphics.Bitmap>() {
-                    override fun onResourceReady(
-                        resource: android.graphics.Bitmap,
-                        transition: com.bumptech.glide.request.transition.Transition<in android.graphics.Bitmap>?
-                    ) {
-                        marker.icon = com.naver.maps.map.overlay.OverlayImage.fromBitmap(resource)
-                    }
-
-                    override fun onLoadCleared(placeholder: android.graphics.drawable.Drawable?) {
-                        // 필요 시 처리
-                    }
-                })
+    private fun addMarkerForMemo(memo: MemoDatabaseHelper.Memo) {
+        val coord = LatLng(memo.y.toDouble(), memo.x.toDouble())
+        val marker = Marker().apply {
+            position = coord
+            icon = MarkerIcons.BLACK // 기본 마커 설정 후 이미지로 교체
+            map = naverMap
         }
 
-        // 사용자가 지도를 터치할 때 마커를 추가하는 리스너
-        naverMap.setOnMapClickListener { _, coord ->
-            // 현재 위치 마커 제거
-            currentLocationMarker?.map = null
+        Glide.with(this)
+            .asBitmap()
+            .load(memo.imagePath)
+            .transform(CircleImageTransform()) // 원형 변환기 적용
+            .into(object : com.bumptech.glide.request.target.CustomTarget<Bitmap>() {
+                override fun onResourceReady(resource: Bitmap, transition: com.bumptech.glide.request.transition.Transition<in Bitmap>?) {
+                    val resizedBitmap = Bitmap.createScaledBitmap(resource, 100, 100, false)
+                    marker.icon = OverlayImage.fromBitmap(resizedBitmap)
+                }
 
-            // 이전에 추가된 마커 제거
+                override fun onLoadCleared(placeholder: android.graphics.drawable.Drawable?) {}
+            })
+
+    }
+
+    private fun setupMapClickListener() {
+        naverMap.setOnMapClickListener { _, coord ->
+            currentLocationMarker?.map = null
             userMarker?.map = null
 
-            // 터치한 위치에 새로운 마커 추가
             userMarker = Marker().apply {
                 position = coord
                 icon = MarkerIcons.RED
                 map = naverMap
             }
 
-            // 터치한 좌표를 Toast로 출력
-            Toast.makeText(
-                context,
-                "터치한 위치 - 위도: ${coord.latitude}, 경도: ${coord.longitude}",
-                Toast.LENGTH_SHORT
-            ).show()
-
-            // 터치한 위치로 카메라 이동
+            Toast.makeText(context, "터치한 위치 - 위도: ${coord.latitude}, 경도: ${coord.longitude}", Toast.LENGTH_SHORT).show()
             naverMap.moveCamera(CameraUpdate.scrollTo(coord))
-
-            // 주소 업데이트
             updateAddressMemo(coord)
         }
     }
-
-
-
-
-
-
-
-
     // 위치 권한을 확인하고 업데이트하는 메서드
     private fun checkLocationPermissionAndUpdateLocation() {
-        if (ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            // 권한이 있는 경우 현재 위치를 갱신
-            updateCurrentLocation()
-        } else {
-            // 권한이 없는 경우 권한을 요청
-            requestPermissions(
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                LOCATION_PERMISSION_REQUEST_CODE
-            )
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                updateCurrentLocation()
+            } else {
+                requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), LOCATION_PERMISSION_REQUEST_CODE)
+            }
         }
-    }
 
     // 현재 위치를 갱신하고 마커를 추가하는 메서드
     private fun updateCurrentLocation() {
-        if (ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
+        if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return
         }
-        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-            if (location != null) {
-                val currentLatLng = LatLng(location.latitude, location.longitude)
 
-                // 현재 위치에 마커 추가. 기존 마커가 있으면 제거
+        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+            location?.let {
+                val currentLatLng = LatLng(it.latitude, it.longitude)
+
+                // 현재 위치에 마커 추가
                 currentLocationMarker?.map = null
                 currentLocationMarker = Marker().apply {
                     position = currentLatLng
                     icon = MarkerIcons.GREEN
                     map = naverMap
                 }
-
-                // 사용자가 생성한 마커가 있으면 제거
                 userMarker?.map = null
-                userMarker = null // 마커 참조를 초기화
+                userMarker = null
 
-                // 현재 위치로 카메라 이동
                 naverMap.moveCamera(CameraUpdate.scrollTo(currentLatLng))
-
-                // 주소 업데이트
                 updateAddressMemo(currentLatLng)
 
-                // 좌표를 Toast로 출력
-                Toast.makeText(
-                    context,
-                    "현재 위치 - 위도: ${currentLatLng.latitude}, 경도: ${currentLatLng.longitude}",
-                    Toast.LENGTH_SHORT
-                ).show()
-            } else {
+                Toast.makeText(context, "현재 위치 - 위도: ${currentLatLng.latitude}, 경도: ${currentLatLng.longitude}", Toast.LENGTH_SHORT).show()
+            } ?: run {
                 Toast.makeText(context, "현재 위치를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
             }
         }
@@ -232,14 +190,13 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
 
     // 좌표 기반으로 주소 가져와서 addressMemo 값 저장
     private fun updateAddressMemo(latLng: LatLng) {
-
-        x = latLng.longitude.toString() // 경도가 x 좌표
-        y = latLng.latitude.toString()  // 위도가 y 좌표
+        x = latLng.longitude.toString()
+        y = latLng.latitude.toString()
 
         val geocoder = Geocoder(requireContext(), Locale.getDefault())
         val addressList = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)
         addressMemo = if (!addressList.isNullOrEmpty()) {
-            addressList[0].getAddressLine(0) // 첫 번째 주소 라인 가져오기
+            addressList[0].getAddressLine(0)
         } else {
             "주소를 찾을 수 없습니다."
         }
@@ -247,28 +204,17 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
     }
 
 
-
     // 위치 권한 요청 결과를 처리하는 메서드
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // 권한이 허가된 경우 현재 위치를 갱신
                 updateCurrentLocation()
             } else {
-                // 권한이 거부된 경우 경고 메시지 출력
                 Toast.makeText(context, "위치 권한이 거부되었습니다.", Toast.LENGTH_SHORT).show()
             }
         } else {
             super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         }
-    }
-
-    companion object {
-        private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
 }
 
