@@ -9,8 +9,6 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import com.bumptech.glide.Glide
@@ -21,7 +19,9 @@ import com.fuciple0.jjikgo.data.MemoDatabaseHelper
 import com.fuciple0.jjikgo.databinding.FragmentAddmemoBottomsheetBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.naver.maps.geometry.LatLng
-import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Locale
+
 
 class AddmemoFragment : BottomSheetDialogFragment() {
 
@@ -109,8 +109,11 @@ class AddmemoFragment : BottomSheetDialogFragment() {
         // 이미지 경로가 null일 경우 기본 이미지 설정
         val imagePath = imgPath ?: getDefaultImagePath()
 
+        // 현재 날짜 및 시간 가져오기
+        val currentDateTime = getCurrentDateTime()
+
         if (address.isNotEmpty() && memoText.isNotEmpty()) {
-            val id = dbHelper.insertMemo(address, rating, imagePath, memoText, x, y)
+            val id = dbHelper.insertMemo(address, rating, imagePath, memoText, x, y, currentDateTime) // 현재 시간을 인자로 추가
             G.userlocation = LatLng(y!!.toDouble(), x!!.toDouble())
 
             if (id != -1L) {
@@ -123,6 +126,12 @@ class AddmemoFragment : BottomSheetDialogFragment() {
         } else {
             Toast.makeText(requireContext(), "모든 내용을 입력해주세요.", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    // 현재 날짜 및 시간을 "yyyy-MM-dd HH:mm:ss" 형식으로 반환하는 함수
+    private fun getCurrentDateTime(): String {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        return dateFormat.format(System.currentTimeMillis())
     }
 
     // 기본 이미지 경로를 반환하는 함수

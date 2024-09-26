@@ -9,9 +9,9 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
 
     companion object {
         const val DATABASE_NAME = "jjikgo.db"
-        private const val DATABASE_VERSION = 3
+        private const val DATABASE_VERSION = 2
 
-        const val TABLE_NAME = "memos"
+        const val TABLE_NAME = "mono_new"
 
         private const val COLUMN_ID = "id"
         private const val COLUMN_ADDRESS = "address"
@@ -20,6 +20,7 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
         private const val COLUMN_MEMO_TEXT = "memo_text"
         private const val COLUMN_X = "x" // 추가된 x 좌표
         private const val COLUMN_Y = "y" // 추가된 y 좌표
+        private const val COLUMN_DATE_TIME = "date_time" // 추가된 날짜 및 시간
     }
 
     override fun onCreate(db: SQLiteDatabase?) {
@@ -31,7 +32,8 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
                 $COLUMN_IMAGE_PATH TEXT,
                 $COLUMN_MEMO_TEXT TEXT,
                 $COLUMN_X TEXT, -- x 좌표 추가
-                $COLUMN_Y TEXT  -- y 좌표 추가
+                $COLUMN_Y TEXT, -- y 좌표 추가
+                $COLUMN_DATE_TIME TEXT -- 날짜 및 시간 추가
             )
         """.trimIndent()
         db?.execSQL(createTable)
@@ -44,8 +46,8 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
         }
     }
 
-    // 메모 저장 메서드에 x, y 추가
-    fun insertMemo(address: String, rating: Float, imagePath: String, memoText: String, x: String?, y: String?): Long {
+    // 메모 저장 메서드에 날짜 및 시간 추가
+    fun insertMemo(address: String, rating: Float, imagePath: String, memoText: String, x: String?, y: String?, dateTime: String): Long {
         val db = writableDatabase
         val values = ContentValues().apply {
             put(COLUMN_ADDRESS, address)
@@ -54,10 +56,10 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
             put(COLUMN_MEMO_TEXT, memoText)
             put(COLUMN_X, x)  // x 좌표 추가
             put(COLUMN_Y, y)  // y 좌표 추가
+            put(COLUMN_DATE_TIME, dateTime) // 날짜 및 시간 추가
         }
         return db.insert(TABLE_NAME, null, values)
     }
-
 
     // MemoDatabaseHelper에서 저장된 모든 메모를 가져오는 메서드 추가
     fun getAllMemos(): List<Memo> {
@@ -74,8 +76,9 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
                 val memoText = cursor.getString(cursor.getColumnIndexOrThrow("memo_text"))
                 val x = cursor.getString(cursor.getColumnIndexOrThrow("x")) // 경도
                 val y = cursor.getString(cursor.getColumnIndexOrThrow("y")) // 위도
+                val dateTime = cursor.getString(cursor.getColumnIndexOrThrow("date_time")) // 날짜 및 시간
 
-                memos.add(Memo(id, address, rating, imagePath, memoText, x, y))
+                memos.add(Memo(id, address, rating, imagePath, memoText, x, y, dateTime))
             } while (cursor.moveToNext())
         }
 
@@ -83,7 +86,7 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
         return memos
     }
 
-    // Memo 데이터 클래스
+    // Memo 데이터 클래스에 날짜 및 시간 추가
     data class Memo(
         val id: Long,
         val address: String,
@@ -91,11 +94,7 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
         val imagePath: String,
         val memo: String,
         val x: String,
-        val y: String
+        val y: String,
+        val dateTime: String // 날짜 및 시간 추가
     )
-
-
-
-
-
 }
