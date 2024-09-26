@@ -54,12 +54,13 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
             put(COLUMN_RATING, rating)
             put(COLUMN_IMAGE_PATH, imagePath)
             put(COLUMN_MEMO_TEXT, memoText)
-            put(COLUMN_X, x)  // x 좌표 추가
-            put(COLUMN_Y, y)  // y 좌표 추가
+            put(COLUMN_X, x)
+            put(COLUMN_Y, y)
             put(COLUMN_DATE_TIME, dateTime) // 날짜 및 시간 추가
         }
         return db.insert(TABLE_NAME, null, values)
     }
+
 
     // MemoDatabaseHelper에서 저장된 모든 메모를 가져오는 메서드 추가
     fun getAllMemos(): List<Memo> {

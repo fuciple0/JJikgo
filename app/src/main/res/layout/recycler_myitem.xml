@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="150dp"
+    android:layout_height="100dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/white"
     android:layout_margin="8dp">
@@ -9,61 +9,87 @@
 
     <ImageView
         android:id="@+id/iv"
-        android:layout_width="130dp"
-        android:layout_height="150dp"
-        android:src="@drawable/dummy_1"
+        android:layout_width="120dp"
+        android:layout_height="100dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="285dp"
+        android:layout_marginLeft="4dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginBottom="4dp"
         android:adjustViewBounds="true"
-        android:scaleType="centerCrop"
         android:background="@drawable/bg_box2"
-        android:layout_margin="4dp"
-        />
+        android:scaleType="centerCrop"
+        android:src="@drawable/dummy_1" />
 
     <TextView
         android:id="@+id/tv_title"
-        android:layout_width="wrap_content"
+        android:layout_width="263dp"
         android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="5dp"
+        android:layout_marginLeft="140dp"
+        android:layout_marginTop="4dp"
+        android:ellipsize="end"
+        android:maxLines="1"
         android:text="새벽집 청담점"
         android:textColor="@color/black"
-        android:textStyle="bold"
         android:textSize="18sp"
-        android:layout_marginTop="4dp"
-        android:layout_marginLeft="140dp"
-        android:maxLines="1"
-        android:ellipsize="end"
-        />
+        android:textStyle="bold" />
 
     <TextView
+        android:id="@+id/tv_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
         android:layout_below="@id/tv_title"
-        android:background="@drawable/baseline_star_24"
-        android:layout_marginLeft="140dp"
-        android:layout_marginTop="4dp"/>
+        android:layout_alignParentStart="true"
+
+        android:layout_marginStart="38dp"
+        android:layout_marginLeft="170dp"
+        android:layout_marginTop="3dp"
+        android:text="2024-08-09 14:44:33"
+        android:textSize="14sp" />
 
     <TextView
         android:id="@+id/tv_rating"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="5.0"
-        android:textSize="18sp"
-        android:textColor="#FF0000"
         android:layout_below="@id/tv_title"
-        android:layout_marginLeft="165dp"
-        android:layout_marginTop="4dp"/>
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="25dp"
+        android:layout_marginLeft="155dp"
+        android:layout_marginTop="3dp"
+        android:text="5"
+        android:textColor="#FF0000"
+        android:textSize="14sp" />
+
+    <TextView
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:layout_below="@id/tv_title"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginLeft="140dp"
+        android:layout_marginTop="7dp"
+        android:background="@drawable/baseline_star_24"
+        android:textSize="16sp" />
 
     <TextView
         android:id="@+id/tv_body"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="고기가 맛있다. 정말 맛있다. 복음밥도 맛있다. 고기가 맛있다. 정말 맛있다. 복음밥도 맛있다.고기가 맛있다. 정말 맛있다. 복음밥도 맛있다 "
-        android:layout_below="@id/tv_rating"
+        android:layout_width="263dp"
+        android:layout_height="40dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="6dp"
         android:layout_marginLeft="140dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginEnd="125dp"
+        android:layout_marginBottom="4dp"
+        android:ellipsize="end"
         android:maxLines="3"
-        android:ellipsize="end"/>
-
-
+        android:text="고기가 맛있다. 정말 맛있다. 복음밥도 맛있다. 고기가 맛있다. 정말 맛있다. 복음밥도 맛있다.고기가 맛있다. 정말 맛있다. 복음밥도 맛있다 " />
 
 
 </RelativeLayout>
