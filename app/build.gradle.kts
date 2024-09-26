@@ -58,6 +58,11 @@ dependencies {
     // Google Play Services - 위치 서비스
     implementation("com.google.android.gms:play-services-location:21.0.1")
 
+    // Google Play services
+    implementation("com.google.gms:google-services:4.3.15")
+    implementation("com.google.firebase:firebase-auth:22.0.0")
+    implementation("com.google.firebase:firebase-bom:32.0.0")
+    implementation("com.google.android.gms:play-services-auth:20.5.0")
 
     // 네이버 간편 로그인
     implementation("com.navercorp.nid:oauth:5.10.0") // jdk 11

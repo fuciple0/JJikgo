@@ -1,73 +1,123 @@
 package com.fuciple0.jjikgo.activities
 
-import android.content.Intent
-import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import com.fuciple0.jjikgo.R
-import com.fuciple0.jjikgo.data.NaverUserInfoResponse
-import com.fuciple0.jjikgo.databinding.ActivityLoginBinding
-import com.fuciple0.jjikgo.network.RetrofitHelper
-import com.fuciple0.jjikgo.network.RetrofitService
-import com.kakao.sdk.auth.model.OAuthToken
-import com.kakao.sdk.user.UserApiClient
-import com.navercorp.nid.NaverIdLoginSDK
-import com.navercorp.nid.oauth.OAuthLoginCallback
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+    import android.content.Intent
+    import android.os.Bundle
+    import android.util.Log
+    import android.widget.Toast
+    import androidx.activity.enableEdgeToEdge
+    import androidx.appcompat.app.AppCompatActivity
+    import androidx.core.view.ViewCompat
+    import androidx.core.view.WindowInsetsCompat
+    import com.fuciple0.jjikgo.R
+    import com.fuciple0.jjikgo.data.NaverUserInfoResponse
+    import com.fuciple0.jjikgo.databinding.ActivityLoginBinding
+    import com.fuciple0.jjikgo.network.RetrofitHelper
+    import com.fuciple0.jjikgo.network.RetrofitService
+    import com.kakao.sdk.auth.model.OAuthToken
+    import com.kakao.sdk.user.UserApiClient
+    import com.navercorp.nid.NaverIdLoginSDK
+    import com.navercorp.nid.oauth.OAuthLoginCallback
+    import com.google.android.gms.auth.api.signin.GoogleSignIn
+    import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+    import com.google.android.gms.auth.api.signin.GoogleSignInClient
+    import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+    import com.google.android.gms.common.api.ApiException
+    import com.google.android.gms.tasks.Task
+    import retrofit2.Call
+    import retrofit2.Callback
+    import retrofit2.Response
 
-class LoginActivity : AppCompatActivity() {
+    class LoginActivity : AppCompatActivity() {
 
-    private val binding by lazy { ActivityLoginBinding.inflate(layoutInflater) }
+        private val binding by lazy { ActivityLoginBinding.inflate(layoutInflater) }
+        private lateinit var googleSignInClient: GoogleSignInClient
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(binding.root)
+        private companion object {
+            private const val RC_SIGN_IN = 9001
+        }
 
-        enableEdgeToEdge()
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
+        override fun onCreate(savedInstanceState: Bundle?) {
+            super.onCreate(savedInstanceState)
+            setContentView(binding.root)
+
+            enableEdgeToEdge()
+            ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+                val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+                insets
+            }
+
+            // Google Sign-In 설정
+            configureGoogleSignIn()
+
+            //둘러보기 글씨 클릭으로 Main 화면으로 이동
+            binding.tvGo.setOnClickListener {
+                startActivity(Intent(this, MainActivity::class.java))
+                finish()
+            }
+
+            // 회원가입 버튼 클릭
+            binding.btnSignup.setOnClickListener {
+                startActivity(Intent(this, SignupActivity::class.java))
+            }
+
+            // 이메일 로그인 버튼
+            binding.btnLoginEmail.setOnClickListener {
+                startActivity(Intent(this, EmailLoginActivity::class.java))
+            }
+
+            // 카카오 로그인 버튼
+            binding.btnLoginKakao.setOnClickListener { loginKaKao() }
+
+            // 네이버 로그인 버튼
+            binding.btnLoginNaver.setOnClickListener { loginNaver() }
+
+            // 구글 로그인 버튼
+            binding.btnLoginGoogle.setOnClickListener { googleSignIn() }
         }
 
 
-        //둘러보기 글씨 클릭으로 Main 화면으로 이동
-        binding.tvGo.setOnClickListener {
-            startActivity(Intent(this, MainActivity::class.java))
-            finish()
+        private fun configureGoogleSignIn() {
+            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build()
+
+            googleSignInClient = GoogleSignIn.getClient(this, gso)
         }
 
-        // 회원가입 버튼 클릭
-        binding.btnSignup.setOnClickListener {
-            startActivity(Intent(this, SignupActivity::class.java))
+        private fun googleSignIn() {
+            val signInIntent = googleSignInClient.signInIntent
+            startActivityForResult(signInIntent, RC_SIGN_IN)
         }
 
-        // 이메일 로그인 버튼
-        binding.btnLoginEmail.setOnClickListener {
-            startActivity(Intent(this, EmailLoginActivity::class.java))
+        override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+            super.onActivityResult(requestCode, resultCode, data)
+
+            if (requestCode == RC_SIGN_IN) {
+                val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+                handleSignInResult(task)
+            }
         }
 
-        // 카카오 로그인 버튼
-        binding.btnLoginKakao.setOnClickListener { loginKaKao() }
+        private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
+            try {
+                val account = completedTask.getResult(ApiException::class.java)
+                val id: String = account.id ?: ""
+                val email: String = account.email ?: ""
+                val displayName: String = account.displayName ?: ""
+                val profileImage: String? = account.photoUrl.toString()
 
-        // 네이버 로그인 버튼
-        binding.btnLoginNaver.setOnClickListener { loginNaver() }
+                Toast.makeText(this, "구글 로그인 성공: $displayName", Toast.LENGTH_SHORT).show()
+                startActivity(Intent(this, MainActivity::class.java))
+                finish()
+            } catch (e: ApiException) {
+                Log.w("Google Sign-In", "signInResult:failed code=" + e.statusCode)
+                Toast.makeText(this, "구글 로그인 실패", Toast.LENGTH_SHORT).show()
+            }
+        }
 
-        // 구글 로그인 버튼
-        binding.btnLoginGoogle.setOnClickListener { loginGoogle() }
 
-    }//onCreate
 
-    private fun loginGoogle() {
-
-    }
 
     private fun loginNaver() {
         // 1. 네이버 개발자 사이트에서 앱 등록 및 라이브러리 추가
