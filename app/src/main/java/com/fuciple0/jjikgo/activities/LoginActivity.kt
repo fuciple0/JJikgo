@@ -60,7 +60,14 @@ class LoginActivity : AppCompatActivity() {
         // 네이버 로그인 버튼
         binding.btnLoginNaver.setOnClickListener { loginNaver() }
 
+        // 구글 로그인 버튼
+        binding.btnLoginGoogle.setOnClickListener { loginGoogle() }
+
     }//onCreate
+
+    private fun loginGoogle() {
+
+    }
 
     private fun loginNaver() {
         // 1. 네이버 개발자 사이트에서 앱 등록 및 라이브러리 추가

@@ -63,29 +63,39 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
 
 
     // MemoDatabaseHelper에서 저장된 모든 메모를 가져오는 메서드 추가
+    // MemoDatabaseHelper.kt
+
     fun getAllMemos(): List<Memo> {
-        val memos = mutableListOf<Memo>()
+        val memoList = mutableListOf<Memo>()
         val db = readableDatabase
-        val cursor = db.query(TABLE_NAME, null, null, null, null, null, null)
+        val cursor = db.query(
+            TABLE_NAME,
+            null,
+            null,
+            null,
+            null,
+            null,
+            "$COLUMN_DATE_TIME DESC" // 날짜 및 시간으로 내림차순 정렬
+        )
 
-        if (cursor.moveToFirst()) {
-            do {
-                val id = cursor.getLong(cursor.getColumnIndexOrThrow("id"))
-                val address = cursor.getString(cursor.getColumnIndexOrThrow("address"))
-                val rating = cursor.getFloat(cursor.getColumnIndexOrThrow("rating"))
-                val imagePath = cursor.getString(cursor.getColumnIndexOrThrow("image_path"))
-                val memoText = cursor.getString(cursor.getColumnIndexOrThrow("memo_text"))
-                val x = cursor.getString(cursor.getColumnIndexOrThrow("x")) // 경도
-                val y = cursor.getString(cursor.getColumnIndexOrThrow("y")) // 위도
-                val dateTime = cursor.getString(cursor.getColumnIndexOrThrow("date_time")) // 날짜 및 시간
+        cursor.use {
+            while (it.moveToNext()) {
+                val id = it.getLong(it.getColumnIndexOrThrow(COLUMN_ID))
+                val address = it.getString(it.getColumnIndexOrThrow(COLUMN_ADDRESS))
+                val rating = it.getFloat(it.getColumnIndexOrThrow(COLUMN_RATING))
+                val imagePath = it.getString(it.getColumnIndexOrThrow(COLUMN_IMAGE_PATH))
+                val memoText = it.getString(it.getColumnIndexOrThrow(COLUMN_MEMO_TEXT))
+                val x = it.getString(it.getColumnIndexOrThrow(COLUMN_X))
+                val y = it.getString(it.getColumnIndexOrThrow(COLUMN_Y))
+                val dateTime = it.getString(it.getColumnIndexOrThrow(COLUMN_DATE_TIME))
 
-                memos.add(Memo(id, address, rating, imagePath, memoText, x, y, dateTime))
-            } while (cursor.moveToNext())
+                val memo = Memo(id, address, rating, imagePath, memoText, x, y, dateTime)
+                memoList.add(memo)
+            }
         }
-
-        cursor.close()
-        return memos
+        return memoList
     }
+
 
     // Memo 데이터 클래스에 날짜 및 시간 추가
     data class Memo(
