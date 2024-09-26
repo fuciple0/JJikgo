@@ -9,7 +9,7 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
 
     companion object {
         const val DATABASE_NAME = "jjikgo.db"
-        private const val DATABASE_VERSION = 2
+        private const val DATABASE_VERSION = 3
 
         const val TABLE_NAME = "memos"
 
@@ -63,7 +63,7 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
     fun getAllMemos(): List<Memo> {
         val memos = mutableListOf<Memo>()
         val db = readableDatabase
-        val cursor = db.query("memos", null, null, null, null, null, null)
+        val cursor = db.query(TABLE_NAME, null, null, null, null, null, null)
 
         if (cursor.moveToFirst()) {
             do {
