@@ -78,8 +78,7 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun setupClickListeners() {
-        //binding.mylocationFab.setOnClickListener { checkLocationPermissionAndUpdateLocation() }
-        binding.mylocationFab.setOnClickListener { updateCurrentLocation() }
+        binding.mylocationFab.setOnClickListener { checkLocationPermissionAndUpdateLocation() }
         binding.addMemoFab.setOnClickListener { showAddMemoBottomSheet() }
     }
 
