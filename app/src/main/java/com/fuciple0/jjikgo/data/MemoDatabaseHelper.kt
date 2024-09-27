@@ -11,10 +11,9 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
 
     companion object {
         const val DATABASE_NAME = "jjikgo.db"
-        private const val DATABASE_VERSION = 3
+        private const val DATABASE_VERSION = 1
 
-        const val TABLE_NAME = "mono_new"
-
+        const val TABLE_MEMO = "memo"
         private const val COLUMN_ID = "id"
         private const val COLUMN_ADDRESS = "address"
         private const val COLUMN_RATING = "rating"
@@ -23,11 +22,20 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
         private const val COLUMN_X = "x" // 추가된 x 좌표
         private const val COLUMN_Y = "y" // 추가된 y 좌표
         private const val COLUMN_DATE_TIME = "date_time" // 추가된 날짜 및 시간
+
+        // 사용자 테이블 관련 상수
+        const val TABLE_USER = "users"
+        private const val COLUMN_USER_ID = "id"
+        private const val COLUMN_NICKNAME = "nickname"
+        private const val COLUMN_EMAIL = "email"
+        private const val COLUMN_PASSWORD = "password"
+        private const val COLUMN_PROFILE_IMAGE = "profile_image"
     }
+
 
     override fun onCreate(db: SQLiteDatabase?) {
         val createTable = """
-            CREATE TABLE $TABLE_NAME (
+            CREATE TABLE $TABLE_MEMO (
                 $COLUMN_ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 $COLUMN_ADDRESS TEXT,
                 $COLUMN_RATING REAL,
@@ -39,11 +47,24 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
             )
         """.trimIndent()
         db?.execSQL(createTable)
+
+        // 사용자 테이블 생성
+        val createUserTable = """
+            CREATE TABLE $TABLE_USER (
+                $COLUMN_USER_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                $COLUMN_NICKNAME TEXT,
+                $COLUMN_EMAIL TEXT,
+                $COLUMN_PASSWORD TEXT,
+                $COLUMN_PROFILE_IMAGE BLOB
+            )
+        """.trimIndent()
+        db?.execSQL(createUserTable)
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
         if (oldVersion < newVersion) {
-            db?.execSQL("DROP TABLE IF EXISTS $TABLE_NAME")
+            db?.execSQL("DROP TABLE IF EXISTS $TABLE_MEMO")
+            db?.execSQL("DROP TABLE IF EXISTS $TABLE_USER")
             onCreate(db)
         }
     }
@@ -60,7 +81,7 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
             put(COLUMN_Y, y)
             put(COLUMN_DATE_TIME, dateTime)
         }
-        return db.insert(TABLE_NAME, null, values)
+        return db.insert(TABLE_MEMO, null, values)
     }
 
     // 저장된 모든 메모를 가져오는 메서드 - BLOB 형식의 이미지 데이터를 바이트 배열로 가져옴
@@ -68,7 +89,7 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
         val memoList = mutableListOf<Memo>()
         val db = readableDatabase
         val cursor = db.query(
-            TABLE_NAME,
+            TABLE_MEMO,
             null,
             null,
             null,
@@ -95,6 +116,20 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
         }
         return memoList
     }
+
+    // 사용자 정보를 삽입하는 메서드
+    fun insertUser(nickname: String, email: String, password: String, profileImage: ByteArray?) {
+        val db = writableDatabase
+        val values = ContentValues().apply {
+            put(COLUMN_NICKNAME, nickname)
+            put(COLUMN_EMAIL, email)
+            put(COLUMN_PASSWORD, password)
+            put(COLUMN_PROFILE_IMAGE, profileImage)
+        }
+        db.insert(TABLE_USER, null, values)
+        db.close()
+    }
+
 
     // Memo 데이터 클래스에 이미지 BLOB 필드를 추가
     data class Memo(
