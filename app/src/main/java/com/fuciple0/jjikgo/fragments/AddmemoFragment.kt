@@ -2,6 +2,8 @@ package com.fuciple0.jjikgo.fragments
 
 import android.content.Intent
 import android.database.Cursor
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -19,6 +21,8 @@ import com.fuciple0.jjikgo.data.MemoDatabaseHelper
 import com.fuciple0.jjikgo.databinding.FragmentAddmemoBottomsheetBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.naver.maps.geometry.LatLng
+import java.io.ByteArrayOutputStream
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -107,18 +111,19 @@ class AddmemoFragment : BottomSheetDialogFragment() {
         val memoText = binding.memoEditText.text.toString()
 
         // 이미지 경로가 null일 경우 기본 이미지 설정
-        val imagePath = imgPath ?: getDefaultImagePath()
+        val imageBlob = imgPath?.let { getImageBlob(it) } ?: getDefaultImageBlob()
+
 
         // 현재 날짜 및 시간 가져오기
         val currentDateTime = getCurrentDateTime()
 
         if (address.isNotEmpty() && memoText.isNotEmpty()) {
-            val id = dbHelper.insertMemo(address, rating, imagePath, memoText, x, y, currentDateTime) // 현재 시간을 인자로 추가
+            val id = dbHelper.insertMemo(address, rating, imageBlob, memoText, x, y, currentDateTime)
             G.userlocation = LatLng(y!!.toDouble(), x!!.toDouble())
 
             if (id != -1L) {
                 Toast.makeText(requireContext(), "메모가 저장되었습니다!", Toast.LENGTH_SHORT).show()
-                dismiss() // 저장 후 바텀시트 닫기
+                dismiss()
                 (context as MainActivity).binding.bnv.selectedItemId = R.id.bnv_menu_location
             } else {
                 Toast.makeText(requireContext(), "저장 실패!", Toast.LENGTH_SHORT).show()
@@ -128,17 +133,26 @@ class AddmemoFragment : BottomSheetDialogFragment() {
         }
     }
 
+    // 이미지 파일을 BLOB 형태로 변환하는 함수
+    private fun getImageBlob(imagePath: String): ByteArray {
+        val file = File(imagePath)
+        return file.readBytes()
+    }
+
+    // 기본 이미지의 BLOB 데이터 반환
+    private fun getDefaultImageBlob(): ByteArray {
+        val defaultImage = BitmapFactory.decodeResource(resources, R.drawable.no_image)
+        val stream = ByteArrayOutputStream()
+        defaultImage.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        return stream.toByteArray()
+    }
+
     // 현재 날짜 및 시간을 "yyyy-MM-dd HH:mm:ss" 형식으로 반환하는 함수
     private fun getCurrentDateTime(): String {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         return dateFormat.format(System.currentTimeMillis())
     }
 
-    // 기본 이미지 경로를 반환하는 함수
-    private fun getDefaultImagePath(): String {
-        // drawable 리소스 경로를 URI 형식으로 반환
-        return "android.resource://${requireContext().packageName}/${R.drawable.no_image}"
-    }
 
 
     override fun onDestroyView() {

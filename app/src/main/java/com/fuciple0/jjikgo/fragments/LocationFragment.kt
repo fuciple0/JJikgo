@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
@@ -116,22 +117,38 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
         val coord = LatLng(memo.y.toDouble(), memo.x.toDouble())
         val marker = Marker().apply {
             position = coord
-            icon = MarkerIcons.BLACK // 기본 마커 설정 후 이미지로 교체
+            icon = MarkerIcons.BLACK
             map = naverMap
         }
 
+        // BLOB을 Bitmap으로 변환 (null 체크 포함)
+        val bitmap = memo.imageBlob?.let { getBitmapFromBlob(it) } ?: getDefaultImageBlobBitmap() // 기본 이미지로 대체
+        val resizedBitmap = Bitmap.createScaledBitmap(bitmap, 85, 85, false)
+
+        marker.icon = OverlayImage.fromBitmap(resizedBitmap)
+
+        // Glide를 사용하여 원형 이미지를 생성
         Glide.with(this)
             .asBitmap()
-            .load(memo.imagePath)
-            .transform(CircleImageTransform()) // 원형 변환기 적용
+            .load(resizedBitmap)
+            .transform(CircleImageTransform())
             .into(object : com.bumptech.glide.request.target.CustomTarget<Bitmap>() {
                 override fun onResourceReady(resource: Bitmap, transition: com.bumptech.glide.request.transition.Transition<in Bitmap>?) {
-                    val resizedBitmap = Bitmap.createScaledBitmap(resource, 85, 85, false)
-                    marker.icon = OverlayImage.fromBitmap(resizedBitmap)
+                    marker.icon = OverlayImage.fromBitmap(resource)
                 }
+
                 override fun onLoadCleared(placeholder: android.graphics.drawable.Drawable?) {}
             })
+    }
 
+    // 기본 이미지의 Bitmap 반환
+    private fun getDefaultImageBlobBitmap(): Bitmap {
+        return BitmapFactory.decodeResource(resources, R.drawable.no_image)
+    }
+
+    // BLOB을 Bitmap으로 변환하는 함수
+    private fun getBitmapFromBlob(blob: ByteArray): Bitmap {
+        return BitmapFactory.decodeByteArray(blob, 0, blob.size)
     }
 
     private fun setupMapClickListener() {

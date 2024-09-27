@@ -1,5 +1,6 @@
 package com.fuciple0.jjikgo.adapters
 
+import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -32,10 +33,13 @@ class MemoAdapter(private val memoList: List<Memo>) : RecyclerView.Adapter<MemoA
         holder.ratingTextView.text = memo.rating.toInt().toString() // 평점 표시
         holder.bodyTextView.text = memo.memo // 메모 내용 표시
 
-        // 이미지 로드
-        Glide.with(holder.imageView.context)
-            .load(memo.imagePath)
-            .into(holder.imageView)
+        // BLOB에서 비트맵 생성 후 이미지뷰에 설정
+        memo.imageBlob?.let { blob ->
+            val bitmap = BitmapFactory.decodeByteArray(blob, 0, blob.size)
+            holder.imageView.setImageBitmap(bitmap)
+        } ?: run {
+            holder.imageView.setImageResource(R.drawable.no_image) // 기본 이미지
+        }
     }
 
     override fun getItemCount(): Int {
