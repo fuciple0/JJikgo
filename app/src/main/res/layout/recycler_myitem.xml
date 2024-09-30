@@ -38,7 +38,7 @@
         android:maxLines="1"
         android:text="새벽집 청담점"
         android:textColor="@color/black"
-        android:textSize="18sp"
+        android:textSize="16sp"
         android:textStyle="bold" />
 
     <TextView

@@ -236,7 +236,7 @@ class LoginActivity : AppCompatActivity() {
             if (error != null) {
                 Toast.makeText(this, "카카오계정으로 로그인 실패", Toast.LENGTH_SHORT).show()
             } else if (token != null) {
-                Toast.makeText(this, "카카오계정으로 로그인 성공", Toast.LENGTH_SHORT).show()
+                //Toast.makeText(this, "카카오계정으로 로그인 성공", Toast.LENGTH_SHORT).show()
 
                 // 사용자 정보 요청
                 UserApiClient.instance.me { user, error ->
@@ -266,13 +266,13 @@ class LoginActivity : AppCompatActivity() {
                                 dbHelper.saveSession(userId)
                             }
 
-                            // main 화면으로 이동
-                            startActivity(Intent(this, MainActivity::class.java))
-                            finish()
                         } else {
                             // 이미 사용자가 존재하는 경우 로그인 처리만 진행
                             Toast.makeText(this, "이미 가입된 사용자입니다.", Toast.LENGTH_SHORT).show()
                         }
+                        // main 화면으로 이동
+                        startActivity(Intent(this, MainActivity::class.java))
+                        finish()
                     } else {
                         Toast.makeText(this, "사용자 정보 요청 실패", Toast.LENGTH_SHORT).show()
                     }

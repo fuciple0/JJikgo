@@ -178,12 +178,26 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
 
     fun saveSession(userId: Int) {
         val db = writableDatabase
+        db.beginTransaction() // 트랜잭션 시작
+        try {
+            // 기존 세션 삭제
             db.execSQL("DELETE FROM $TABLE_SESSION")
-        val values = ContentValues().apply {
-            put(COLUMN_SESSION_USER_ID, userId)
+
+            // 새로운 세션 저장
+            val values = ContentValues().apply {
+                put(COLUMN_SESSION_USER_ID, userId)
+            }
+            db.insert(TABLE_SESSION, null, values)
+
+            // 트랜잭션 성공적으로 완료
+            db.setTransactionSuccessful()
+        } catch (e: Exception) {
+            e.printStackTrace() // 예외 처리
+        } finally {
+            // 트랜잭션 종료 및 데이터베이스 닫기
+            db.endTransaction()
+            db.close()
         }
-        db.insert(TABLE_SESSION, null, values)
-        db.close()
     }
 
     fun logoutUser() {
