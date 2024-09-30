@@ -1,60 +1,86 @@
 package com.fuciple0.jjikgo.fragments
 
+import android.content.Intent
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.fuciple0.jjikgo.R
+import com.fuciple0.jjikgo.activities.LoginActivity
+import com.fuciple0.jjikgo.data.MemoDatabaseHelper
+import com.fuciple0.jjikgo.databinding.FragmentMypageBinding
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [MypageFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class MypageFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private lateinit var binding: FragmentMypageBinding
+    private lateinit var dbHelper: MemoDatabaseHelper
+    private var currentUserId: Int? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_mypage, container, false)
+        // 뷰 바인딩 설정
+        binding = FragmentMypageBinding.inflate(inflater, container, false)
+        dbHelper = MemoDatabaseHelper(requireContext())
+
+        // 현재 로그인한 사용자 ID를 가져옴
+        currentUserId = getCurrentUserId()
+
+        // 로그인된 사용자가 있다면 사용자 정보를 불러옴
+        currentUserId?.let { loadUserInfo(it) }
+
+        // 로그아웃 버튼 클릭 리스너 설정
+        binding.btnLogout.setOnClickListener {
+            logout()
+        }
+
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment MypageFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            MypageFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
+    private fun getCurrentUserId(): Int? {
+        // 세션에서 현재 로그인한 사용자 ID를 가져옵니다.
+        val db = dbHelper.readableDatabase
+        val cursor = db.rawQuery("SELECT ${MemoDatabaseHelper.COLUMN_SESSION_USER_ID} FROM ${MemoDatabaseHelper.TABLE_SESSION}", null)
+
+        var userId: Int? = null
+        if (cursor.moveToFirst()) {
+            userId = cursor.getInt(cursor.getColumnIndexOrThrow(MemoDatabaseHelper.COLUMN_SESSION_USER_ID))
+        }
+        cursor.close()
+        db.close()
+
+        return userId
+    }
+
+    private fun loadUserInfo(userId: Int) {
+        val user = dbHelper.getUserInfo(userId)
+
+        user?.let {
+            // 닉네임 설정
+            binding.userNick.text = it.nickname
+
+            // 프로필 이미지 설정
+            if (it.profileImage != null) {
+                val bitmap = BitmapFactory.decodeByteArray(it.profileImage, 0, it.profileImage.size)
+                binding.userProfile.setImageBitmap(bitmap)
+            } else {
+                // 프로필 이미지가 없을 경우 기본 이미지 설정
+                binding.userProfile.setImageResource(R.drawable.user_profile)
             }
+        }
+    }
+
+    private fun logout() {
+        // SQLite에서 현재 로그인한 사용자 세션 정보를 삭제
+        dbHelper.logoutUser()
+
+        // LoginActivity로 이동
+        val intent = Intent(requireContext(), LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        requireActivity().finish() // 현재 액티비티 종료
     }
 }

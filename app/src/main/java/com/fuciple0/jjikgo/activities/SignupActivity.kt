@@ -45,21 +45,24 @@ class SignupActivity : AppCompatActivity() {
         binding.userProfileFab.setOnClickListener { clickSelect() }
         binding.userProfile.setOnClickListener { clickSelect() }
 
-// 가입하기 버튼 클릭 반응
+        // 가입하기 버튼 클릭 반응
         binding.btnSignup.setOnClickListener {
-            val nickname = binding.inputNickname.editText?.text.toString()
-            val email = binding.inputEmail.editText?.text.toString()
-            val password = binding.inputPw.editText?.text.toString()
+            val nickname = binding.inputNickname.editText?.text.toString().trim()
+            val email = binding.inputEmail.editText?.text.toString().trim()
+            val password = binding.inputPw.editText?.text.toString().trim()
 
-            if (nickname.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty()) {
+            if (nickname.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && password.length >= 6) {
                 val profileImageBlob = selectedImageUri?.let { getImageBlob(it) }
                 dbHelper.insertUser(nickname, email, password, profileImageBlob)
+
+                // 세션에 사용자 ID 저장 (여기서는 1을 예시로 사용)
+                dbHelper.saveSession(1) // 사용자 ID를 저장하는 메서드 추가 필요
 
                 Toast.makeText(this, "회원가입되었습니다.", Toast.LENGTH_SHORT).show()
                 startActivity(Intent(this, MainActivity::class.java))
                 finish()
             } else {
-                Toast.makeText(this, "모든 필드를 채워주세요.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "모든 내용를 채워주세요. 비밀번호는 6자 이상이어야 합니다.", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -74,6 +77,7 @@ class SignupActivity : AppCompatActivity() {
             Intent(Intent.ACTION_OPEN_DOCUMENT).setType("image/*")
         resultLauncher.launch(intent)
     }
+
 
     // 결과를 처리하는 대행사
     private val resultLauncher = registerForActivityResult(

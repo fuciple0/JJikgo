@@ -1,5 +1,6 @@
 package com.fuciple0.jjikgo.data
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
@@ -11,7 +12,7 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
 
     companion object {
         const val DATABASE_NAME = "jjikgo.db"
-        private const val DATABASE_VERSION = 1
+        private const val DATABASE_VERSION = 2
 
         const val TABLE_MEMO = "memo"
         private const val COLUMN_ID = "id"
@@ -30,6 +31,11 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
         private const val COLUMN_EMAIL = "email"
         private const val COLUMN_PASSWORD = "password"
         private const val COLUMN_PROFILE_IMAGE = "profile_image"
+
+
+        const val TABLE_SESSION = "session"
+        const val COLUMN_SESSION_USER_ID = "user_id"
+
     }
 
 
@@ -59,12 +65,21 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
             )
         """.trimIndent()
         db?.execSQL(createUserTable)
+
+        val createSessionTable = """
+            CREATE TABLE $TABLE_SESSION (
+                $COLUMN_SESSION_USER_ID INTEGER PRIMARY KEY
+            )
+        """.trimIndent()
+        db?.execSQL(createSessionTable)
+
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
         if (oldVersion < newVersion) {
             db?.execSQL("DROP TABLE IF EXISTS $TABLE_MEMO")
             db?.execSQL("DROP TABLE IF EXISTS $TABLE_USER")
+            db?.execSQL("DROP TABLE IF EXISTS $TABLE_SESSION")
             onCreate(db)
         }
     }
@@ -143,8 +158,96 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
         val dateTime: String
     )
 
+    fun loginUser(email: String, password: String): Boolean {
+        val db = readableDatabase
+        val query = "SELECT $COLUMN_USER_ID FROM $TABLE_USER WHERE $COLUMN_EMAIL = ? AND $COLUMN_PASSWORD = ?"
+        val cursor = db.rawQuery(query, arrayOf(email, password))
+
+        var isLoggedIn = false
+        if (cursor.moveToFirst()) {
+            val userId = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_USER_ID))
+
+            saveSession(userId)
+            isLoggedIn = true
+        }
+        cursor.close()
+        db.close()
+
+        return isLoggedIn
+    }
+
+    @SuppressLint("Range")
+    fun getUserByEmailAndPassword(email: String, password: String): User? {
+        val db = this.readableDatabase
+        val cursor = db.query(
+            "users",
+            arrayOf("id", "nickname", "profileImage"),
+            "email = ? AND password = ?",
+            arrayOf(email, password),
+            null, null, null
+        )
+
+        return if (cursor.moveToFirst()) {
+            val id = cursor.getInt(cursor.getColumnIndex("id"))
+            val nickname = cursor.getString(cursor.getColumnIndex("nickname"))
+            val profileImage = cursor.getBlob(cursor.getColumnIndex("profileImage"))
+            User(id, nickname, profileImage)
+        } else {
+            null // 사용자가 존재하지 않으면 null 반환
+        }.also {
+            cursor.close()
+        }
+    }
+
+
+    fun saveSession(userId: Int) {
+        val db = writableDatabase
+        db.execSQL("DELETE FROM $TABLE_SESSION")
+        val values = ContentValues().apply {
+            put(COLUMN_SESSION_USER_ID, userId)
+        }
+        db.insert(TABLE_SESSION, null, values)
+        db.close()
+    }
+
+    fun logoutUser() {
+        val db = writableDatabase
+        db.execSQL("DELETE FROM $TABLE_SESSION")
+        db.close()
+    }
+
+    fun isUserLoggedIn(): Boolean {
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT $COLUMN_SESSION_USER_ID FROM $TABLE_SESSION", null)
+
+        val isLoggedIn = cursor.moveToFirst()
+        cursor.close()
+        db.close()
+
+        return isLoggedIn
+    }
+
+    fun getUserInfo(userId: Int): User? {
+        val db = this.readableDatabase
+        val query = "SELECT $COLUMN_NICKNAME, $COLUMN_PROFILE_IMAGE FROM $TABLE_USER WHERE $COLUMN_USER_ID = ?"
+        val cursor = db.rawQuery(query, arrayOf(userId.toString()))
+
+        var user: User? = null
+        if (cursor.moveToFirst()) {
+            val nickname = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NICKNAME))
+            val profileImage = cursor.getBlob(cursor.getColumnIndexOrThrow(COLUMN_PROFILE_IMAGE))
+            user = User(userId, nickname, profileImage)
+        }
+        cursor.close()
+        db.close()
+        return user
+    }
+}
+
+
+
     // BLOB 데이터를 Bitmap으로 변환하는 메서드 (필요 시 활용)
     fun blobToBitmap(blob: ByteArray): Bitmap {
         return BitmapFactory.decodeByteArray(blob, 0, blob.size)
     }
-}
+

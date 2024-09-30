@@ -9,6 +9,7 @@ package com.fuciple0.jjikgo.activities
     import androidx.core.view.ViewCompat
     import androidx.core.view.WindowInsetsCompat
     import com.fuciple0.jjikgo.R
+    import com.fuciple0.jjikgo.data.MemoDatabaseHelper
     import com.fuciple0.jjikgo.data.NaverUserInfoResponse
     import com.fuciple0.jjikgo.databinding.ActivityLoginBinding
     import com.fuciple0.jjikgo.network.RetrofitHelper
@@ -31,6 +32,7 @@ package com.fuciple0.jjikgo.activities
 
         private val binding by lazy { ActivityLoginBinding.inflate(layoutInflater) }
         private lateinit var googleSignInClient: GoogleSignInClient
+        private lateinit var dbHelper: MemoDatabaseHelper
 
         private companion object {
             private const val RC_SIGN_IN = 9001
@@ -74,6 +76,7 @@ package com.fuciple0.jjikgo.activities
 
             // 구글 로그인 버튼
             binding.btnLoginGoogle.setOnClickListener { googleSignIn() }
+
         }
 
 
