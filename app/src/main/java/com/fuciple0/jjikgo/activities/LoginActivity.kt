@@ -1,6 +1,8 @@
 package com.fuciple0.jjikgo.activities
 
     import android.content.Intent
+    import android.graphics.Bitmap
+    import android.graphics.drawable.BitmapDrawable
     import android.os.Bundle
     import android.util.Log
     import android.widget.Toast
@@ -27,8 +29,12 @@ package com.fuciple0.jjikgo.activities
     import retrofit2.Call
     import retrofit2.Callback
     import retrofit2.Response
+    import java.io.ByteArrayOutputStream
+    import java.io.IOException
+    import java.net.HttpURLConnection
+    import java.net.URL
 
-    class LoginActivity : AppCompatActivity() {
+class LoginActivity : AppCompatActivity() {
 
         private val binding by lazy { ActivityLoginBinding.inflate(layoutInflater) }
         private lateinit var googleSignInClient: GoogleSignInClient
@@ -110,7 +116,26 @@ package com.fuciple0.jjikgo.activities
                 val displayName: String = account.displayName ?: ""
                 val profileImage: String? = account.photoUrl.toString()
 
-                Toast.makeText(this, "구글 로그인 성공: $displayName", Toast.LENGTH_SHORT).show()
+                // DB에 사용자 정보 저장 및 중복 가입 방지
+                val dbHelper = MemoDatabaseHelper(this)
+                val existingUser = dbHelper.getUserByEmail(email)
+
+                if (existingUser == null) {
+                    // 프로필 이미지가 없으면 기본 이미지 사용
+                    val profileImageBytes = getDefaultProfileImage() // 기본 이미지
+
+                    // 새로운 사용자 정보 저장
+                    dbHelper.insertUser(displayName, email, "google", profileImageBytes)
+
+                    // 세션 저장
+                    val userId = dbHelper.getUserByEmailAndPassword(email, "google")?.id
+                    if (userId != null) {
+                        dbHelper.saveSession(userId)
+                    }
+                } else {
+                    Toast.makeText(this, "이미 가입된 사용자입니다.", Toast.LENGTH_SHORT).show()
+                }
+
                 startActivity(Intent(this, MainActivity::class.java))
                 finish()
             } catch (e: ApiException) {
@@ -164,40 +189,40 @@ package com.fuciple0.jjikgo.activities
                         val nickname: String = userInfo?.response?.nickname ?: ""
                         val profile_image: String = userInfo?.response?.profile_image ?: ""
 
-//                        val message = """
-//                            ID: $id
-//                            Email: $email
-//                            Nickname: $nickname
-//                            Profile Image URL: $profile_image
-//                        """.trimIndent()
-//
-//                        AlertDialog.Builder(this@LoginActivity)
-//                            .setTitle("네이버 사용자 정보")
-//                            .setMessage(message)
-//                            .setPositiveButton("확인") { dialog, _ ->
-//                                dialog.dismiss()
-//                            }
-//                            .create()
-//                            .show()
+                        // DB에 사용자 정보 저장 및 중복 가입 방지
+                        val dbHelper = MemoDatabaseHelper(this@LoginActivity)
+                        val existingUser = dbHelper.getUserByEmail(email)
 
+                        if (existingUser == null) {
+                            // 프로필 이미지가 없으면 기본 이미지 사용
+                            val profileImageBytes = getDefaultProfileImage() // 기본 이미지
+
+
+                            Toast.makeText(this@LoginActivity, "로그인 성공1-1", Toast.LENGTH_SHORT).show()
+
+                            // 새로운 사용자 정보 저장
+                            dbHelper.insertUser(nickname, email, "naver", profileImageBytes)
+
+                            // 세션 저장
+                            val userId = dbHelper.getUserByEmailAndPassword(email, "naver")?.id
+                            if (userId != null) {
+                                dbHelper.saveSession(userId)
+                            }
+                        } else {
+                            Toast.makeText(this@LoginActivity, "이미 가입된 사용자입니다.", Toast.LENGTH_SHORT).show()
+                        }
+
+                        Toast.makeText(this@LoginActivity, "로그인 성공2222", Toast.LENGTH_SHORT).show()
                         // 로그인 했으니 메인 화면으로 이동
                         startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                         finish()
-
                     }
-
                     override fun onFailure(p0: Call<NaverUserInfoResponse>, p1: Throwable) {
                         Toast.makeText(this@LoginActivity, "회원정보 불러오기 실패 : ${p1.message}", Toast.LENGTH_SHORT).show()
                     }
                 })
-
-
-
-
             }
         })
-
-
     }
 
     private fun loginKaKao() {
@@ -215,22 +240,43 @@ package com.fuciple0.jjikgo.activities
 
                 // 사용자 정보 요청
                 UserApiClient.instance.me { user, error ->
-                    if (user != null){
-                        val id:String = user.id.toString()
-                        val email:String = user.kakaoAccount?.email ?: ""    // 앞에가 null이면 뒤에꺼 ""
-                        val nickname:String = user.kakaoAccount?.profile?.nickname ?: ""
-                        val profileImg:String?= user.kakaoAccount?.profile?.profileImageUrl
+                    if (user != null) {
+                        val id: String = user.id.toString()
+                        val nickname: String = user.kakaoAccount?.profile?.nickname ?: ""
+                        val email: String = user.kakaoAccount?.email
+                            ?: "${nickname}@kakao.com"    // 앞에가 null이면 뒤에꺼 ""
+                        //val profileImg:String?= user.kakaoAccount?.profile?.profileImageUrl
 
-                        Toast.makeText(this, "$nickname", Toast.LENGTH_SHORT).show()
-                       // G.userAccount = UserAccount(id, email, "kakao")
+                        // 프로필 이미지 대신 기본 이미지 사용
+                        val defaultProfileImageBytes = getDefaultProfileImage()
 
+                        // SQLite에 사용자 정보 저장
+                        val dbHelper = MemoDatabaseHelper(this)
 
-                        // main 화면으로 이동
-                        startActivity(Intent(this, MainActivity::class.java))
-                        finish()
+                        // DB에서 이메일을 기준으로 사용자가 존재하는지 확인
+                        val existingUser = dbHelper.getUserByEmail(email)
+
+                        if (existingUser == null) {
+                            // 사용자가 존재하지 않으면 새로운 사용자 정보 저장
+                            dbHelper.insertUser(nickname, email, "kakao", defaultProfileImageBytes)
+
+                            // 저장된 사용자 정보를 기반으로 세션 저장
+                            val userId = dbHelper.getUserByEmailAndPassword(email, "kakao")?.id
+                            if (userId != null) {
+                                dbHelper.saveSession(userId)
+                            }
+
+                            // main 화면으로 이동
+                            startActivity(Intent(this, MainActivity::class.java))
+                            finish()
+                        } else {
+                            // 이미 사용자가 존재하는 경우 로그인 처리만 진행
+                            Toast.makeText(this, "이미 가입된 사용자입니다.", Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        Toast.makeText(this, "사용자 정보 요청 실패", Toast.LENGTH_SHORT).show()
                     }
                 }
-
             }
         }
 
@@ -243,6 +289,30 @@ package com.fuciple0.jjikgo.activities
         }
 
 
+    }
+
+    // drawable의 기본 이미지를 ByteArray로 변환하는 함수
+    private fun getDefaultProfileImage(): ByteArray {
+        val drawable = resources.getDrawable(R.drawable.user_profile, null)
+        val bitmap = (drawable as BitmapDrawable).bitmap
+        val stream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        return stream.toByteArray()
+    }
+
+    // 이미지 URL을 ByteArray로 변환하는 함수 (필요 시 사용)
+    private fun downloadImage(imageUrl: String): ByteArray? {
+        return try {
+            val url = URL(imageUrl)
+            val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
+            connection.doInput = true
+            connection.connect()
+            val inputStream = connection.inputStream
+            inputStream.readBytes()
+        } catch (e: IOException) {
+            e.printStackTrace()
+            null
+        }
     }
 
 

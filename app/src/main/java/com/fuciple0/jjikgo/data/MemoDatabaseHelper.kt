@@ -176,33 +176,9 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
         return isLoggedIn
     }
 
-    @SuppressLint("Range")
-    fun getUserByEmailAndPassword(email: String, password: String): User? {
-        val db = this.readableDatabase
-        val cursor = db.query(
-            "users",
-            arrayOf("id", "nickname", "profileImage"),
-            "email = ? AND password = ?",
-            arrayOf(email, password),
-            null, null, null
-        )
-
-        return if (cursor.moveToFirst()) {
-            val id = cursor.getInt(cursor.getColumnIndex("id"))
-            val nickname = cursor.getString(cursor.getColumnIndex("nickname"))
-            val profileImage = cursor.getBlob(cursor.getColumnIndex("profileImage"))
-            User(id, nickname, profileImage)
-        } else {
-            null // 사용자가 존재하지 않으면 null 반환
-        }.also {
-            cursor.close()
-        }
-    }
-
-
     fun saveSession(userId: Int) {
         val db = writableDatabase
-        db.execSQL("DELETE FROM $TABLE_SESSION")
+            db.execSQL("DELETE FROM $TABLE_SESSION")
         val values = ContentValues().apply {
             put(COLUMN_SESSION_USER_ID, userId)
         }
@@ -242,7 +218,45 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
         db.close()
         return user
     }
-}
+
+
+    // 이메일과 비밀번호로 사용자 조회
+    fun getUserByEmailAndPassword(email: String, password: String): User? {
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM $TABLE_USER WHERE $COLUMN_EMAIL = ? AND $COLUMN_PASSWORD = ?", arrayOf(email, password))
+
+        return if (cursor.moveToFirst()) {
+            val id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_USER_ID))
+            val nickname = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NICKNAME))
+            val profileImage = cursor.getBlob(cursor.getColumnIndexOrThrow(COLUMN_PROFILE_IMAGE))
+
+            User(id, nickname, profileImage)
+        } else {
+            null
+        }.also {
+            cursor.close()
+        }
+    }
+
+    // 이메일로 사용자 조회
+    fun getUserByEmail(email: String): User? {
+        val db = this.readableDatabase
+        val cursor = db.rawQuery("SELECT * FROM $TABLE_USER WHERE $COLUMN_EMAIL = ?", arrayOf(email))
+
+        return if (cursor.moveToFirst()) {
+            val id = cursor.getInt(cursor.getColumnIndexOrThrow(COLUMN_USER_ID))
+            val nickname = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NICKNAME))
+            val profileImage = cursor.getBlob(cursor.getColumnIndexOrThrow(COLUMN_PROFILE_IMAGE))
+
+            User(id, nickname, profileImage)
+        } else {
+            null
+        }.also {
+            cursor.close()
+        }
+    }
+
+
 
 
 
@@ -250,4 +264,11 @@ class MemoDatabaseHelper(context: Context) : SQLiteOpenHelper(context, DATABASE_
     fun blobToBitmap(blob: ByteArray): Bitmap {
         return BitmapFactory.decodeByteArray(blob, 0, blob.size)
     }
+
+
+}
+
+
+
+
 

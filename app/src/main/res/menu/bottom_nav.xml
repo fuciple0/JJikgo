@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:id="@+id/bnv_menu_location" android:title="지도" android:icon="@drawable/ic_action_location"/>
-    <item android:id="@+id/bnv_menu_list" android:title="목록" android:icon="@drawable/ic_action_list"/>
-    <item android:id="@+id/bnv_menu_shared" android:title="추천" android:icon="@drawable/ic_action_share"/>
-    <item android:id="@+id/bnv_menu_account" android:title="MY" android:icon="@drawable/ic_action_account"/>
+    <item android:id="@+id/bnv_menu_location" android:title="지도 보기" android:icon="@drawable/ic_action_location"/>
+    <item android:id="@+id/bnv_menu_list" android:title="내 목록 보기" android:icon="@drawable/ic_action_list"/>
+    <item android:id="@+id/bnv_menu_shared" android:title="추천목록 보기" android:icon="@drawable/ic_action_share"/>
+    <item android:id="@+id/bnv_menu_account" android:title="마이페이지" android:icon="@drawable/ic_action_account"/>
 
 
 </menu>

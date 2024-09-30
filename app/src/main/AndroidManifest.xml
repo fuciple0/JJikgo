@@ -2,8 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
-
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
@@ -18,7 +17,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.JJikgo"
         tools:targetApi="31">
-
         <activity
             android:name=".activities.SignupActivity"
             android:exported="false" />
@@ -30,38 +28,34 @@
             android:exported="false" />
         <activity
             android:name=".activities.IntroActivity"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".activities.MainActivity"
-            android:exported="false"/>
-
-        <!-- 네이버 맵 api 클라이언트 아이디 등록       -->
+            android:exported="false" /> <!-- 네이버 맵 api 클라이언트 아이디 등록 -->
         <meta-data
             android:name="com.naver.maps.map.CLIENT_ID"
-            android:value="sj5n0ymdfc" />
-
-        <!--카카오 Redirect URI 설정-->
+            android:value="sj5n0ymdfc" /> <!-- 카카오 Redirect URI 설정 -->
         <activity
             android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <!-- Redirect URI: "kakao${NATIVE_APP_KEY}://oauth" -->
-                <data android:host="oauth"
+                <data
+                    android:host="oauth"
                     android:scheme="kakaofc2a68e80a52a25bb9510c8d81b0f53a" />
             </intent-filter>
         </activity>
-
-
     </application>
 
 </manifest>
