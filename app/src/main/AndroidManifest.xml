@@ -16,6 +16,7 @@
         android:roundIcon="@drawable/jjikgo_icon"
         android:supportsRtl="true"
         android:theme="@style/Theme.JJikgo"
+        android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
             android:name=".activities.SignupActivity"
