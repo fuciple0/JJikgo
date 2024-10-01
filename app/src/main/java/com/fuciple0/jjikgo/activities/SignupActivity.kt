@@ -146,9 +146,7 @@ class SignupActivity : AppCompatActivity() {
             override fun onResponse(call: Call<String>, response: Response<String>) {
                 val responseBody = response.body()
 
-
                 //Toast.makeText(this@SignupActivity, responseBody, Toast.LENGTH_SHORT).show()
-
                 // 서버 응답 확인을 위한 로그 추가
                 Log.d("SignupActivity9", "Response Body9: $responseBody")
 
@@ -158,11 +156,6 @@ class SignupActivity : AppCompatActivity() {
                 } else {
                     Toast.makeText(this@SignupActivity, "Response body is null", Toast.LENGTH_SHORT).show()
                 }
-
-
-            // 업로드 완료 후 화면 전환
-                startActivity(Intent(this@SignupActivity, MainActivity::class.java))
-                finish()
             }
 
             override fun onFailure(call: Call<String>, t: Throwable) {
