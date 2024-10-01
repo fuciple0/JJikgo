@@ -1,6 +1,7 @@
 package com.fuciple0.jjikgo.activities
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -17,6 +18,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.bumptech.glide.Glide
 import com.fuciple0.jjikgo.R
 import com.fuciple0.jjikgo.data.MemoDatabaseHelper
+import com.fuciple0.jjikgo.data.RegisterResponse
 import com.fuciple0.jjikgo.databinding.ActivitySignupBinding
 import com.fuciple0.jjikgo.network.RetrofitHelper
 import com.fuciple0.jjikgo.network.RetrofitService
@@ -32,7 +34,6 @@ import okhttp3.MediaType.Companion.toMediaType
 class SignupActivity : AppCompatActivity() {
 
     private val binding by lazy { ActivitySignupBinding.inflate(layoutInflater) }
-    private lateinit var dbHelper: MemoDatabaseHelper
     private var selectedImageUri: Uri? = null
     private var imgPath: String? = null  // 이미지 절대경로를 저장하는 변수
 
@@ -46,8 +47,6 @@ class SignupActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
-        dbHelper = MemoDatabaseHelper(this)
 
         // 뒤로가기 버튼 클릭 반응
         binding.toolbar.setNavigationOnClickListener { finish() }
@@ -63,26 +62,13 @@ class SignupActivity : AppCompatActivity() {
             val password = binding.inputPw.editText?.text.toString().trim()
 
             if (nickname.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && password.length >= 6) {
-                val profileImageBlob = selectedImageUri?.let { getImageBlob(it) }
-                dbHelper.insertUser(nickname, email, password, profileImageBlob)
-
-                // 세션에 사용자 ID 저장 (여기서는 1을 예시로 사용)
-                dbHelper.saveSession(1) // 사용자 ID를 저장하는 메서드 추가 필요
-
-                // 외부 서버에 데이터 업로드
-                uploadToServer(nickname, email, password)
-
-
-                Toast.makeText(this, "회원가입되었습니다.", Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this, MainActivity::class.java))
-                finish()
+                // 이메일 중복 확인 후 회원가입 진행
+                checkEmailAndSignup(nickname, email, password)
             } else {
                 Toast.makeText(this, "모든 내용를 채워주세요. 비밀번호는 6자 이상이어야 합니다.", Toast.LENGTH_SHORT).show()
             }
         }
     }
-
-
 
     private fun clickSelect() {
         // 사진 or 갤러리 앱을 실행해서 업로드할 사진을 선택
@@ -92,7 +78,6 @@ class SignupActivity : AppCompatActivity() {
             Intent(Intent.ACTION_OPEN_DOCUMENT).setType("image/*")
         resultLauncher.launch(intent)
     }
-
 
     // 결과를 처리하는 대행사
     private val resultLauncher = registerForActivityResult(
@@ -108,7 +93,6 @@ class SignupActivity : AppCompatActivity() {
             }
         }
     }
-
     // 절대 경로 가져오기
     private fun getRealPathFromUri(uri: Uri): String? {
         val cursor = contentResolver.query(uri, null, null, null, null)
@@ -120,59 +104,9 @@ class SignupActivity : AppCompatActivity() {
         }
         return null
     }
-
-    // 외부 서버로 데이터 업로드
-    private fun uploadToServer(nickname: String, email: String, password: String) {
-        val retrofit = RetrofitHelper.getRetrofitInstance("http://fuciple0.dothome.co.kr/")
-        val retrofitService = retrofit.create(RetrofitService::class.java)
-
-        // String 데이터들을 Map에 저장
-        val dataPart: MutableMap<String, String> = mutableMapOf()
-        dataPart["nickname_user"] = nickname
-        dataPart["email_user"] = email
-        dataPart["pw_user"] = password
-        dataPart["level_user"] = "1"  // level_user 기본값은 1
-
-        // 이미지 파일을 MultipartBody.Part로 포장
-        val filePart: MultipartBody.Part? = imgPath?.let {
-            val file = File(it)
-            val requestBody = RequestBody.create("image/*".toMediaType(), file)  // 수정된 부분
-            MultipartBody.Part.createFormData("profileimg_user", file.name, requestBody)
-        }
-
-        // 서버로 데이터 전송
-        val call = retrofitService.postDataToServer(dataPart, filePart)
-        call.enqueue(object : Callback<String> {
-            override fun onResponse(call: Call<String>, response: Response<String>) {
-                val responseBody = response.body()
-
-                //Toast.makeText(this@SignupActivity, responseBody, Toast.LENGTH_SHORT).show()
-                // 서버 응답 확인을 위한 로그 추가
-                Log.d("SignupActivity9", "Response Body9: $responseBody")
-
-                // 서버 응답이 성공했는지 확인
-                if (responseBody != null) {
-                    Toast.makeText(this@SignupActivity, responseBody, Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this@SignupActivity, "Response body is null", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onFailure(call: Call<String>, t: Throwable) {
-                // 로그로 에러 메시지 출력
-                Log.e("SignupActivity", "Error:요기 ${t.message}", t)
-                Toast.makeText(this@SignupActivity, "Error:여기 ${t.message}", Toast.LENGTH_LONG).show()
-            }
-        })
-    }
-
-
     companion object {
         private const val IMAGE_PICK_REQUEST_CODE = 1001
     }
-
-
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == IMAGE_PICK_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
@@ -182,16 +116,100 @@ class SignupActivity : AppCompatActivity() {
         }
     }
 
+    // 이메일 중복 확인 후 회원가입 진행
+    private fun checkEmailAndSignup(nickname: String, email: String, password: String) {
+        val retrofit = RetrofitHelper.getRetrofitInstance("http://fuciple0.dothome.co.kr/")
+        val retrofitService = retrofit.create(RetrofitService::class.java)
 
-    private fun getImageBlob(uri: Uri): ByteArray? {
-        contentResolver.openInputStream(uri)?.use { inputStream ->
-            return ByteArrayOutputStream().apply {
-                inputStream.copyTo(this)
-            }.toByteArray()
-        }
-        return null
+        // 이메일 중복 확인 API 호출
+        val callCheckEmail = retrofitService.checkEmailExists(email)
+        callCheckEmail.enqueue(object : Callback<Boolean> {
+            override fun onResponse(call: Call<Boolean>, response: Response<Boolean>) {
+                val emailExists = response.body() ?: false
+
+                if (emailExists) {
+                    // 이메일이 이미 존재하는 경우
+                    Toast.makeText(this@SignupActivity, "이미 존재하는 이메일입니다.", Toast.LENGTH_SHORT).show()
+                    val intent = Intent(this@SignupActivity, EmailLoginActivity::class.java)
+                    intent.putExtra("email", email)
+                    intent.putExtra("nickname", nickname)
+                    startActivity(intent)
+                    finish() // SignupActivity 종료
+                } else {
+                    // 이메일이 중복되지 않으면 회원가입 진행
+                    uploadToServerAndFetchEmailIndex(nickname, email, password)
+                }
+            }
+
+            override fun onFailure(call: Call<Boolean>, t: Throwable) {
+                Toast.makeText(this@SignupActivity, "이메일 확인 실패: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
+    // 회원가입 후 서버에서 email_index 값을 받아오는 함수
+    private fun uploadToServerAndFetchEmailIndex(nickname: String, email: String, password: String) {
+        val retrofit = RetrofitHelper.getRetrofitInstance("http://fuciple0.dothome.co.kr/")
+        val retrofitService = retrofit.create(RetrofitService::class.java)
 
+        val dataPart: MutableMap<String, String> = mutableMapOf()
+        dataPart["nickname_user"] = nickname
+        dataPart["email_user"] = email
+        dataPart["pw_user"] = password
+        dataPart["level_user"] = "1"  // 기본값 1 설정
 
+        // 이미지 파일을 MultipartBody.Part로 포장
+        val filePart: MultipartBody.Part? = imgPath?.let {
+            val file = File(it)
+            val requestBody = RequestBody.create("image/*".toMediaType(), file)
+            MultipartBody.Part.createFormData("profileimg_user", file.name, requestBody)
+        }
+
+        val call = retrofitService.registerUser(dataPart, filePart)
+        call.enqueue(object : Callback<RegisterResponse> {
+            override fun onResponse(call: Call<RegisterResponse>, response: Response<RegisterResponse>) {
+                if (response.isSuccessful) {
+                    val registerResponse = response.body()
+
+                    // 서버에서 성공적으로 email_index를 받은 경우
+                    if (registerResponse?.success == true) {
+                        val emailIndex = registerResponse.emailIndex  // 서버에서 받은 email_index
+
+                        // email_index를 SharedPreferences에 저장
+                        val sharedPreferences = getSharedPreferences("login_prefs", Context.MODE_PRIVATE)
+                        val editor = sharedPreferences.edit()
+                        editor.putInt("email_index", emailIndex)  // email_index 저장
+                        editor.putBoolean("is_logged_in", true)  // 로그인 상태 저장
+                        editor.apply()
+
+                        // 사용자 정보도 SharedPreferences에 저장
+                        saveLoginInfoToPreferences(nickname, email)
+
+                        // MainActivity로 이동
+                        val intent = Intent(this@SignupActivity, MainActivity::class.java)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        startActivity(intent)
+                    } else {
+                        Toast.makeText(this@SignupActivity, registerResponse?.message ?: "회원가입 실패", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<RegisterResponse>, t: Throwable) {
+                Toast.makeText(this@SignupActivity, "서버 통신 실패: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    // SharedPreferences에 로그인 정보 저장
+    private fun saveLoginInfoToPreferences(nickname: String, email: String) {
+        val sharedPreferences = getSharedPreferences("login_prefs", MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+
+        editor.putString("nickname", nickname)
+        editor.putString("email", email)
+        editor.putBoolean("is_logged_in", true)
+        editor.apply()
+    }
 }

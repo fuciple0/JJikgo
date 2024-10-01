@@ -1,5 +1,6 @@
 package com.fuciple0.jjikgo.fragments
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -9,13 +10,17 @@ import android.view.View
 import android.view.ViewGroup
 import com.fuciple0.jjikgo.R
 import com.fuciple0.jjikgo.activities.LoginActivity
-import com.fuciple0.jjikgo.data.MemoDatabaseHelper
+import com.fuciple0.jjikgo.data.UserResponse
 import com.fuciple0.jjikgo.databinding.FragmentMypageBinding
+import com.fuciple0.jjikgo.network.RetrofitHelper
+import com.fuciple0.jjikgo.network.RetrofitService
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class MypageFragment : Fragment() {
 
     private lateinit var binding: FragmentMypageBinding
-    private lateinit var dbHelper: MemoDatabaseHelper
     private var currentUserId: Int? = null
 
     override fun onCreateView(
@@ -24,13 +29,14 @@ class MypageFragment : Fragment() {
     ): View? {
         // 뷰 바인딩 설정
         binding = FragmentMypageBinding.inflate(inflater, container, false)
-        dbHelper = MemoDatabaseHelper(requireContext())
 
-        // 현재 로그인한 사용자 ID를 가져옴
+        // SharedPreferences에서 현재 로그인한 사용자 ID를 가져옴
         currentUserId = getCurrentUserId()
 
-        // 로그인된 사용자가 있다면 사용자 정보를 불러옴
-        currentUserId?.let { loadUserInfo(it) }
+        // 로그인된 사용자의 정보를 서버에서 불러옴
+        currentUserId?.let { userId ->
+            loadUserInfoFromServer(userId)
+        }
 
         // 로그아웃 버튼 클릭 리스너 설정
         binding.btnLogout.setOnClickListener {
@@ -41,41 +47,64 @@ class MypageFragment : Fragment() {
     }
 
     private fun getCurrentUserId(): Int? {
-        // 세션에서 현재 로그인한 사용자 ID를 가져옵니다.
-        val db = dbHelper.readableDatabase
-        val cursor = db.rawQuery("SELECT ${MemoDatabaseHelper.COLUMN_SESSION_USER_ID} FROM ${MemoDatabaseHelper.TABLE_SESSION}", null)
-
-        var userId: Int? = null
-        if (cursor.moveToFirst()) {
-            userId = cursor.getInt(cursor.getColumnIndexOrThrow(MemoDatabaseHelper.COLUMN_SESSION_USER_ID))
-        }
-        cursor.close()
-        db.close()
-
-        return userId
+        // SharedPreferences에서 현재 로그인한 사용자 ID를 가져옴
+        val sharedPreferences = requireContext().getSharedPreferences("login_prefs", Context.MODE_PRIVATE)
+        return sharedPreferences.getInt("user_id", -1).takeIf { it != -1 }
     }
 
-    private fun loadUserInfo(userId: Int) {
-        val user = dbHelper.getUserInfo(userId)
+    private fun loadUserInfoFromServer(userId: Int) {
+        val retrofit = RetrofitHelper.getRetrofitInstance("http://fuciple0.dothome.co.kr/")
+        val retrofitService = retrofit.create(RetrofitService::class.java)
 
-        user?.let {
-            // 닉네임 설정
-            binding.userNick.text = it.nickname
+        // 서버에서 사용자 정보를 요청
+        val call = retrofitService.getUserInfo(userId)  // 서버에서 사용자 정보 요청
+        call.enqueue(object : Callback<UserResponse> {
+            override fun onResponse(call: Call<UserResponse>, response: Response<UserResponse>) {
+                if (response.isSuccessful) {
+                    val user = response.body()
 
-            // 프로필 이미지 설정
-            if (it.profileImage != null) {
-                val bitmap = BitmapFactory.decodeByteArray(it.profileImage, 0, it.profileImage.size)
-                binding.userProfile.setImageBitmap(bitmap)
-            } else {
-                // 프로필 이미지가 없을 경우 기본 이미지 설정
-                binding.userProfile.setImageResource(R.drawable.user_profile)
+                    user?.let {
+                        // 닉네임 설정
+                        binding.userNick.text = it.nickname
+
+                        // 프로필 이미지 설정
+                        if (it.profileImage != null) {
+                            val bitmap = BitmapFactory.decodeByteArray(it.profileImage, 0, it.profileImage.size)
+                            binding.userProfile.setImageBitmap(bitmap)
+                        } else {
+                            // 프로필 이미지가 없을 경우 기본 이미지 설정
+                            binding.userProfile.setImageResource(R.drawable.user_profile)
+                        }
+
+                        // 레벨 설정
+                        binding.userLevel.text = "레벨 : ${it.level}"
+                    }
+                } else {
+                    // 실패 시 처리
+                    binding.userNick.text = "불러오기 실패"
+                    binding.userProfile.setImageResource(R.drawable.user_profile)
+                    binding.userLevel.text = "레벨 : 불러오기 실패"
+                }
             }
-        }
+
+            override fun onFailure(call: Call<UserResponse>, t: Throwable) {
+                // 네트워크 오류 처리
+                binding.userNick.text = "불러오기 실패"
+                binding.userProfile.setImageResource(R.drawable.user_profile)
+                binding.userLevel.text = "레벨 : 불러오기 실패"
+            }
+        })
     }
+
 
     private fun logout() {
-        // SQLite에서 현재 로그인한 사용자 세션 정보를 삭제
-        dbHelper.logoutUser()
+        // SharedPreferences에서 로그인 정보 삭제
+        val sharedPreferences = requireContext().getSharedPreferences("login_prefs", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+
+        // 로그인 상태와 관련된 정보를 모두 삭제
+        editor.clear()
+        editor.apply()
 
         // LoginActivity로 이동
         val intent = Intent(requireContext(), LoginActivity::class.java)
@@ -83,4 +112,5 @@ class MypageFragment : Fragment() {
         startActivity(intent)
         requireActivity().finish() // 현재 액티비티 종료
     }
+
 }

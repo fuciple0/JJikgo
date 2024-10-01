@@ -1,17 +1,25 @@
 package com.fuciple0.jjikgo.network
 
 import androidx.appcompat.app.AlertDialog
+import com.fuciple0.jjikgo.data.LoginResponse
 import com.fuciple0.jjikgo.data.NaverUserInfoResponse
+import com.fuciple0.jjikgo.data.RegisterResponse
+import com.fuciple0.jjikgo.data.UserResponse
+
 import okhttp3.MultipartBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import retrofit2.http.Body
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.PartMap
+import retrofit2.http.Query
 
 interface RetrofitService {
 
@@ -26,17 +34,38 @@ interface RetrofitService {
     //            AlertDialog.Builder(this@LoginActivity).setMessage("${s}").create().show()
     //        }
 
+
+
+
     @GET("/v1/nid/me")
     fun getNaverUserInfo(@Header("Authorization") authorization:String): Call<NaverUserInfoResponse>
 
-    // 문자열과 이미지 파일을 함께 POST 방식으로 서버로 전송
-    @Multipart
-    @POST("/Jjikgo/register_user.php")  // php 파일 URL
-    fun postDataToServer(
-        @PartMap dataPart: Map<String, String>,  // 문자열 데이터 전송
-        @Part filePart: MultipartBody.Part?      // 이미지 파일 전송
-    ): Call<String> // 서버로부터 응답을 String으로 받음
 
+    // 이메일 중복 확인 API
+    @GET("Jjikgo/checkEmail.php")
+    fun checkEmailExists(
+        @Query("email_user") email: String
+    ): Call<Boolean>
+
+    @FormUrlEncoded
+    @POST("Jjikgo/login.php")
+    fun loginUser(
+        @Field("email_user") email: String,
+        @Field("pw_user") password: String
+    ): Call<LoginResponse>
+
+
+    @GET("Jjikgo/getUserInfo.php")
+    fun getUserInfo(@Query("user_id") userId: Int): Call<UserResponse>
+
+
+    // 회원가입 API 호출 (문자열과 이미지 파일을 함께 전송)
+    @Multipart
+    @POST("Jjikgo/register_user.php")  // php 파일 URL
+    fun registerUser(
+        @PartMap data: Map<String, String>,  // 문자열 데이터를 보낼 때 사용
+        @Part profileImage: MultipartBody.Part?  // 선택적 프로필 이미지
+    ): Call<RegisterResponse>
 
 
 }

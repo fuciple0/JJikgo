@@ -24,8 +24,22 @@ class IntroActivity : AppCompatActivity() {
         // 일정시간 후(2초)에 자동으로 LoginActivity를 실행하기
         // Handler().postDelayed({},2000)
         Handler(Looper.getMainLooper()).postDelayed({
-            startActivity(Intent(this, LoginActivity::class.java))
-            finish()
+
+            // SharedPreferences에서 로그인 상태 확인
+            val sharedPreferences = getSharedPreferences("login_prefs", MODE_PRIVATE)
+            val isLoggedIn = sharedPreferences.getBoolean("is_logged_in", false)
+
+            if (isLoggedIn) {
+                // 로그인된 상태라면 메인 액티비티로 이동
+                startActivity(Intent(this, MainActivity::class.java))
+                finish()
+            } else {
+                // 로그인되지 않은 경우 로그인 액티비티로 이동
+                startActivity(Intent(this, LoginActivity::class.java))
+                finish()
+            }
+
+
         },2000)
 
 
