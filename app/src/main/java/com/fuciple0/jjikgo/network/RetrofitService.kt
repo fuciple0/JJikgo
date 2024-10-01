@@ -56,7 +56,7 @@ interface RetrofitService {
 
 
     @GET("Jjikgo/getUserInfo.php")
-    fun getUserInfo(@Query("user_id") userId: Int): Call<UserResponse>
+    fun getUserInfo(@Query("emailIndex") userId: Int): Call<UserResponse>
 
 
     // 회원가입 API 호출 (문자열과 이미지 파일을 함께 전송)
