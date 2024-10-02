@@ -10,7 +10,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="새로운 메모"
+        android:text="새로운 기록"
         android:textSize="20sp"
         android:textStyle="bold"
         android:layout_marginBottom="16dp"/>
@@ -60,11 +60,12 @@
         android:id="@+id/memoEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="추억을 메모하세요"
+        android:hint="추억을 기록하세요"
         android:padding="8dp"
         android:inputType="textMultiLine"
         android:background="@drawable/bg_box"
-        android:layout_margin="16dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
         android:minLines="3"/>
 
 

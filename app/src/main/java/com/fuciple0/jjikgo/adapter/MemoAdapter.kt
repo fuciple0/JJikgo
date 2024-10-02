@@ -1,20 +1,19 @@
-package com.fuciple0.jjikgo.adapters
+package com.fuciple0.jjikgo.adapter
 
 import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.fuciple0.jjikgo.R
 import com.fuciple0.jjikgo.data.MemoDatabaseHelper.Memo
+import com.google.android.material.imageview.ShapeableImageView
 
 class MemoAdapter(private val memoList: List<Memo>) : RecyclerView.Adapter<MemoAdapter.MemoViewHolder>() {
 
     class MemoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val imageView: ImageView = itemView.findViewById(R.id.iv)
+        val imageView: ShapeableImageView = itemView.findViewById(R.id.iv)
         val titleTextView: TextView = itemView.findViewById(R.id.tv_title)
         val timeTextView: TextView = itemView.findViewById(R.id.tv_time)
         val ratingTextView: TextView = itemView.findViewById(R.id.tv_rating)

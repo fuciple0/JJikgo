@@ -4,12 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.fuciple0.jjikgo.R
-import com.fuciple0.jjikgo.adapters.MemoAdapter
+import com.fuciple0.jjikgo.adapter.MemoAdapter
 import com.fuciple0.jjikgo.data.MemoDatabaseHelper
 
 class MylistFragment : Fragment() {
