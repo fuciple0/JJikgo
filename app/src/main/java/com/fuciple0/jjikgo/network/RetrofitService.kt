@@ -9,6 +9,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.http.Field
+import retrofit2.http.FieldMap
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -75,6 +76,15 @@ interface RetrofitService {
         @Query("email_index") emailIndex: Int?,
         @Query("share_memo") shareMemo: Int
     ): Call<List<MemoResponse>>
+
+    // 기존 메모 업데이트
+    @Multipart
+    @POST("Jjikgo/update_memo.php")
+    fun updateMemo(
+        @PartMap dataPart: Map<String, String>,
+        @Part filePart: MultipartBody.Part? // 이미지 파일이 있을 때만 추가
+    ): Call<String>
+
 
 
 }

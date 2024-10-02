@@ -190,9 +190,7 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-
-
-
+    // 서버에서 기록 불러오기
     private fun loadMemosForUser(emailIndex: Int) {
         val retrofit = RetrofitHelper.getRetrofitInstance("http://fuciple0.dothome.co.kr/")
         val retrofitService = retrofit.create(RetrofitService::class.java)
@@ -231,6 +229,12 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
             map = naverMap
         }
 
+        // 마커 클릭 리스너 추가
+        marker.setOnClickListener {
+            showMemoBottomSheet(memo)
+            true
+        }
+
         // 이미지 주소가 있을 경우 Glide로 이미지 로드 및 원형 변환 적용
         if (memo.img_memo != null && memo.img_memo.isNotEmpty()) {
             val fullImageUrl = "http://fuciple0.dothome.co.kr/Jjikgo/${memo.img_memo}"
@@ -260,6 +264,24 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
+    private fun showMemoBottomSheet(memo: MemoResponse) {
+        // AddmemoFragment 재활용
+        val addMemoFragment = AddmemoFragment()
+
+        val bundle = Bundle().apply {
+            putString("addressMemo", memo.addr_memo)
+            putFloat("rating", memo.score_memo.toFloat())
+            putString("memoText", memo.text_memo)
+            putString("imageUrl", memo.img_memo)
+            putString("x", memo.x_memo)
+            putString("y", memo.y_memo)
+            putString("dateMemo", memo.date_memo)
+            putInt("id_memo", memo.id_memo)  // id_memo 추가
+        }
+
+        addMemoFragment.arguments = bundle
+        addMemoFragment.show(childFragmentManager, "MemoBottomSheet")
+    }
 
 
 

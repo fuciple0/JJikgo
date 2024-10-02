@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.widget.TooltipCompat
 import com.bumptech.glide.Glide
 import com.fuciple0.jjikgo.G
 import com.fuciple0.jjikgo.R
@@ -58,29 +59,47 @@ class AddmemoFragment : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // 전달받은 데이터로 UI 채우기
+        val idMemo = arguments?.getInt("id_memo", -1)  // id_memo 값이 있으면 받음, 없으면 -1
+        val addressMemo = arguments?.getString("addressMemo")
+        val rating = arguments?.getFloat("rating", 0f)
+        val memoText = arguments?.getString("memoText")
+        val imageUrl = arguments?.getString("imageUrl")
+        val x = arguments?.getString("x")
+        val y = arguments?.getString("y")
+
+        binding.addressTv.text = addressMemo
+        binding.ratingBar.rating = rating ?: 0f
+        binding.memoEditText.setText(memoText)
+
+        if (imageUrl.isNullOrEmpty()) {
+            // 이미지가 없을 때 툴팁을 설정
+            TooltipCompat.setTooltipText(binding.memoImage, "이미지를 추가해 보세요")
+        } else {
+            // 이미지가 있을 경우에만 Glide로 이미지 로드
+            val fullImageUrl = "http://fuciple0.dothome.co.kr/Jjikgo/$imageUrl"
+            Glide.with(this).load(fullImageUrl).into(binding.memoImage)
+        }
+
         // Retrofit 인스턴스 생성
         val retrofitService = RetrofitHelper.getRetrofitInstance("http://fuciple0.dothome.co.kr/")
             .create(RetrofitService::class.java)
 
-
-        // dbHelper = MemoDatabaseHelper(requireContext())
-
-
-        // 전달받은 주소 값 표시
-        val addressMemo = arguments?.getString("addressMemo")
-        val x = arguments?.getString("x")
-        val y = arguments?.getString("y")
-        binding.addressTv.text = addressMemo
-
-
-        // saveMemoButton1에 리스너 추가 (서버로 메모 업로드, shareMemo = false)
+        // id_memo 값이 없으면 새로운 메모 추가, 있으면 업데이트
         binding.saveMemoButton1.setOnClickListener {
-            saveMemoToServer(retrofitService, x, y, false)
+            if (idMemo == -1) {
+                saveMemoToServer(retrofitService, x, y, false)
+            } else {
+                updateMemoToServer(retrofitService, idMemo.toString(), x, y, false)
+            }
         }
 
-        // saveMemoButton2에 리스너 추가 (서버로 메모 업로드, shareMemo = true)
         binding.saveMemoButton2.setOnClickListener {
-            saveMemoToServer(retrofitService, x, y, true)
+            if (idMemo == -1) {
+                saveMemoToServer(retrofitService, x, y, true)
+            } else {
+                updateMemoToServer(retrofitService, idMemo.toString(), x, y, true)
+            }
         }
 
         // 이미지 선택 리스너
@@ -240,6 +259,60 @@ class AddmemoFragment : BottomSheetDialogFragment() {
         })
     }
 
+    private fun updateMemoToServer(retrofitService: RetrofitService, idMemo: String, x: String?, y: String?, shareMemo: Boolean) {
+        val address = binding.addressTv.text.toString()
+        val rating = binding.ratingBar.rating.toString()
+        val memoText = binding.memoEditText.text.toString()
+
+        // SharedPreferences에서 emailIndex 값을 가져옴
+        val sharedPreferences: SharedPreferences = requireContext().getSharedPreferences("login_prefs", Context.MODE_PRIVATE)
+        val emailIndex = sharedPreferences.getInt("email_index", -1).toString()
+
+        // 전송할 String 데이터들을 Map 컬렉션에 저장
+        val dataPart: MutableMap<String, String> = mutableMapOf(
+            "id_memo" to idMemo,
+            "addr_memo" to address,
+            "score_memo" to rating,  // rating의 기본값을 0으로 설정
+            "text_memo" to memoText,
+            "x_memo" to (x ?: ""),
+            "y_memo" to (y ?: ""),
+            "date_memo" to getCurrentDateTime(),
+            "share_memo" to if (shareMemo) "1" else "0",
+            "email_index" to emailIndex
+        )
+        // 이미지 파일을 선택한 경우에만 파일 포장
+        val filePart: MultipartBody.Part? = imgPath?.let {
+            val file = File(it)
+            val requestBody = file.asRequestBody("image/*".toMediaTypeOrNull())
+            MultipartBody.Part.createFormData("img_memo", file.name, requestBody)
+        }
+
+        // Retrofit 서비스 호출
+        val call = retrofitService.updateMemo(dataPart, filePart)
+        Log.d("Retrofit", "Updating memo data: $dataPart")
+        filePart?.let {
+            Log.d("Retrofit", "Uploading image: ${filePart.body.contentType()}")
+        }
+
+        // 서버 응답 처리
+        call.enqueue(object : Callback<String> {
+            override fun onResponse(call: Call<String>, response: Response<String>) {
+                if (response.isSuccessful) {
+                    Toast.makeText(requireContext(), "메모가 업로드되었습니다!", Toast.LENGTH_SHORT).show()
+                    //서버 저장 성공시에 기록한 좌표 저장
+                    G.userlocation = LatLng(x!!.toDouble(), y!!.toDouble())
+                    dismiss()
+                    (context as MainActivity).binding.bnv.selectedItemId = R.id.bnv_menu_location
+                } else {
+                    Toast.makeText(requireContext(), "업로드 실패: ${response.errorBody()?.string()}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<String>, t: Throwable) {
+                Toast.makeText(requireContext(), "네트워크 오류: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
 
 
 

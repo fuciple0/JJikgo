@@ -5,25 +5,19 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:padding="16dp"
-    android:background="@color/white">
+    >
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="새로운 기록"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="16dp"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/baseline_add_location_24"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/default_marker"
             />
         <TextView
             android:id="@+id/address_tv"
@@ -31,7 +25,7 @@
             android:layout_height="wrap_content"
             android:text="서울 성동구 성수동 2가 284-50"
             android:textSize="15sp"
-            android:layout_marginBottom="16dp"/>
+            />
 
     </LinearLayout>
 
@@ -41,20 +35,20 @@
         android:layout_height="wrap_content"
         android:progressTint="#2B5CBF"
         android:stepSize="1.0"
+        android:layout_marginTop="4dp"
         android:layout_gravity="center"
         />
-
 
     <ImageView
         android:id="@+id/memo_image"
         android:layout_width="230dp"
-        android:layout_height="140dp"
+        android:layout_height="150dp"
         android:src="@drawable/add_camera3"
         android:layout_gravity="center"
         android:adjustViewBounds="true"
         android:scaleType="centerInside"
+        android:layout_marginBottom="8dp"
         />
-
 
     <EditText
         android:id="@+id/memoEditText"
@@ -74,7 +68,6 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
     >
-
         <Button
             android:id="@+id/saveMemoButton1"
             android:layout_width="wrap_content"
@@ -83,6 +76,7 @@
             android:layout_marginTop="16dp"
             android:textColor="@color/white"
             android:backgroundTint="#868686"
+            android:textSize="16sp"
             android:layout_weight="1"
             android:layout_margin="4dp"/>
 
@@ -94,6 +88,7 @@
             android:layout_marginTop="16dp"
             android:textColor="@color/white"
             android:backgroundTint="#2B5CBF"
+            android:textSize="16sp"
             android:layout_weight="1"
             android:layout_margin="4dp"/>
 
