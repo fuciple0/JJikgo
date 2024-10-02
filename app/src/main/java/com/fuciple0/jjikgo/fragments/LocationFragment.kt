@@ -216,8 +216,8 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
 
     // 좌표 기반으로 주소 가져와서 addressMemo 값 저장
     private fun updateAddressMemo(latLng: LatLng) {
-        x = latLng.longitude.toString()
-        y = latLng.latitude.toString()
+        y = latLng.longitude.toString()
+        x = latLng.latitude.toString()
 
         val geocoder = Geocoder(requireContext(), Locale.getDefault())
         val addressList = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)

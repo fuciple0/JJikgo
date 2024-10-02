@@ -1,16 +1,13 @@
 package com.fuciple0.jjikgo.network
 
-import androidx.appcompat.app.AlertDialog
 import com.fuciple0.jjikgo.data.LoginResponse
+import com.fuciple0.jjikgo.data.MemoResponse
 import com.fuciple0.jjikgo.data.NaverUserInfoResponse
 import com.fuciple0.jjikgo.data.RegisterResponse
 import com.fuciple0.jjikgo.data.UserResponse
-
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
@@ -20,6 +17,7 @@ import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.PartMap
 import retrofit2.http.Query
+
 
 interface RetrofitService {
 
@@ -33,9 +31,6 @@ interface RetrofitService {
     //            val s = p1.body()
     //            AlertDialog.Builder(this@LoginActivity).setMessage("${s}").create().show()
     //        }
-
-
-
 
     @GET("/v1/nid/me")
     fun getNaverUserInfo(@Header("Authorization") authorization:String): Call<NaverUserInfoResponse>
@@ -66,6 +61,14 @@ interface RetrofitService {
         @PartMap data: Map<String, String>,  // 문자열 데이터를 보낼 때 사용
         @Part profileImage: MultipartBody.Part?  // 선택적 프로필 이미지
     ): Call<RegisterResponse>
+
+
+    @Multipart
+    @POST("Jjikgo/upload_memo.php")
+    fun uploadMemo(
+        @PartMap dataPart: Map<String, String>,
+        @Part filePart: MultipartBody.Part?
+    ): Call<String>
 
 
 }
