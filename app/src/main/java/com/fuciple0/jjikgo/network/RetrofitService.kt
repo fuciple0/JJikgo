@@ -70,5 +70,11 @@ interface RetrofitService {
         @Part filePart: MultipartBody.Part?
     ): Call<String>
 
+    @GET("Jjikgo/get_memos.php")
+    fun getMemos(
+        @Query("email_index") emailIndex: Int?,
+        @Query("share_memo") shareMemo: Int
+    ): Call<List<MemoResponse>>
+
 
 }

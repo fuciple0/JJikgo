@@ -14,20 +14,18 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
+import com.fuciple0.jjikgo.G
 import com.fuciple0.jjikgo.R
 import com.fuciple0.jjikgo.activities.MainActivity
 import com.fuciple0.jjikgo.network.RetrofitService
-import com.fuciple0.jjikgo.data.MemoResponse
 import com.fuciple0.jjikgo.databinding.FragmentAddmemoBottomsheetBinding
 import com.fuciple0.jjikgo.network.RetrofitHelper
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.naver.maps.geometry.LatLng
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -222,6 +220,9 @@ class AddmemoFragment : BottomSheetDialogFragment() {
                 if (response.isSuccessful) {
                     val result = response.body()
                     Log.d("Retrofit", "Upload successful, response: $result")
+                    //서버 저장 성공시에 기록한 좌표 저장
+                    G.userlocation = LatLng(x!!.toDouble(), y!!.toDouble())
+
                     Toast.makeText(requireContext(), "$result", Toast.LENGTH_SHORT).show()
 
                     dismiss()
