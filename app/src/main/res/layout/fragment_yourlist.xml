@@ -11,7 +11,8 @@
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:title="나의 목록보기"
+        app:title="추천 목록보기"
+        app:titleCentered="true"
         app:navigationIcon="@drawable/ic_action_back" />
 
     <androidx.recyclerview.widget.RecyclerView

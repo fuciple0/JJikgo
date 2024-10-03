@@ -109,9 +109,10 @@
             android:paddingTop="4dp"
             android:paddingRight="8dp"
             android:paddingBottom="4dp"
-            android:layout_marginLeft="75dp"
+            android:layout_marginLeft="85dp"
             android:text="팔로우"
             />
+
     </LinearLayout>
 
     <LinearLayout
@@ -150,12 +151,23 @@
 
 </LinearLayout>
 
+    <TextView
+        android:id="@+id/tv_addr"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sec2"
+        android:paddingTop="4dp"
+        android:paddingRight="8dp"
+        android:paddingLeft="8dp"
+        android:textStyle="bold"
+        android:text="서울 성동구 성수동 1가 14-76 " />
+
 
     <TextView
         android:id="@+id/tv_body"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/sec2"
+        android:layout_below="@id/tv_addr"
         android:paddingTop="4dp"
         android:paddingRight="8dp"
         android:paddingLeft="8dp"
@@ -176,42 +188,45 @@
         app:shapeAppearanceOverlay="@style/Circle"
         app:srcCompat="@drawable/dummy_3" />
 
+
     <LinearLayout
-        android:id="@+id/sec3"
-        android:layout_width="wrap_content"
-        android:layout_height="30dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_below="@+id/iv"
         android:gravity="center_vertical"
-        android:background="@drawable/bg_box_gray"
         android:layout_marginBottom="12dp"
-        android:layout_marginTop="4dp"
-        >
+        android:layout_marginTop="2dp">
 
-
-        <TextView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_marginStart="12dp"
-
-            android:background="@drawable/baseline_thumb_up_off_alt_24"
-            />
-
-        <TextView
-            android:id="@+id/tv_like"
+        <LinearLayout
+            android:id="@+id/sec3"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="10"
-            android:layout_marginLeft="4dp"
-            android:layout_marginRight="12dp"
-            android:textColor="#7D7D7D"
-            android:textSize="16dp"
+            android:layout_height="30dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_box_gray"
+            >
+            <TextView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginStart="12dp"
+                android:background="@drawable/baseline_thumb_up_off_alt_24"
+                />
 
-            />
-
-
+            <TextView
+                android:id="@+id/tv_like"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="10"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="12dp"
+                android:textColor="#7D7D7D"
+                android:textSize="16dp"
+                />
+        </LinearLayout>
 
     </LinearLayout>
+
 
 
 

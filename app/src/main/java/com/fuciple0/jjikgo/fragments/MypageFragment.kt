@@ -2,13 +2,17 @@ package com.fuciple0.jjikgo.fragments
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.fuciple0.jjikgo.R
 import com.fuciple0.jjikgo.activities.LoginActivity
@@ -19,6 +23,7 @@ import com.fuciple0.jjikgo.network.RetrofitService
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+
 
 class MypageFragment : Fragment() {
 
@@ -41,6 +46,23 @@ class MypageFragment : Fragment() {
             Log.e("mytag", "${emailIndex}")
         }
 
+        // 툴바 클릭 리스너
+        binding.toolbar.setOnClickListener {
+            // 툴바가 클릭되었을 때 처리할 작업
+            Log.d("MypageFragment", "Toolbar clicked")
+        }
+
+        // 툴바 메뉴 아이템 클릭 리스너
+        binding.toolbar.setOnMenuItemClickListener { item ->
+            if (item.itemId == R.id.menu_logout) {
+                showLogoutConfirmationDialog()  // 로그아웃 확인 다이얼로그 호출
+                true
+            } else {
+                false
+            }
+        }
+
+
 
         // 로그아웃 버튼 클릭 리스너 설정
         binding.btnLogout.setOnClickListener {
@@ -49,6 +71,7 @@ class MypageFragment : Fragment() {
 
         return binding.root
     }
+
 
     private fun getCurrentEmailIndex(): Int? {
         // SharedPreferences에서 현재 로그인한 사용자의 email_index 값을 가져옴
@@ -118,5 +141,27 @@ class MypageFragment : Fragment() {
         startActivity(intent)
         requireActivity().finish() // 현재 액티비티 종료
     }
+
+
+    private fun showLogoutConfirmationDialog() {
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setTitle("로그아웃")
+        builder.setMessage("정말 로그아웃 하시겠습니까?")
+
+        // "확인" 버튼
+        builder.setPositiveButton("확인") { dialog, _ ->
+            logout()  // 확인을 누르면 로그아웃 메서드 호출
+            dialog.dismiss()
+        }
+
+        // "취소" 버튼
+        builder.setNegativeButton("취소") { dialog, _ ->
+            dialog.dismiss()  // 취소를 누르면 다이얼로그만 닫힘
+        }
+
+        val dialog: AlertDialog = builder.create()
+        dialog.show()
+    }
+
 
 }

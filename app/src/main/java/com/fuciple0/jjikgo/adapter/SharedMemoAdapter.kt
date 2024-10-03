@@ -38,6 +38,7 @@ class SharedMemoAdapter(private val sharedMemoList: List<SharedMemoData>) :
         // 메모 정보 바인딩
         holder.binding.tvBody.text = sharedMemo.memoText
         holder.binding.tvTime.text = sharedMemo.memoDate
+        holder.binding.tvAddr.text = sharedMemo.addrMemo  // 주소 바인딩 추가
 
         // 프로필 이미지 로드 (Glide 사용)
         Glide.with(holder.itemView.context)
