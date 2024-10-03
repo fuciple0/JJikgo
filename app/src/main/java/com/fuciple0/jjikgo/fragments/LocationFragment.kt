@@ -37,6 +37,7 @@ import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.MapFragment
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.OnMapReadyCallback
+import com.naver.maps.map.overlay.InfoWindow
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.util.FusedLocationSource
@@ -180,6 +181,19 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
                 userMarker?.map = null
                 userMarker = null
 
+                // InfoWindow 생성 및 마커에 연결
+                val infoWindow = InfoWindow().apply {
+                    adapter = object : InfoWindow.DefaultTextAdapter(requireContext()) {
+                        override fun getText(infoWindow: InfoWindow): CharSequence {
+                            return "새 메모"
+                        }
+                    }
+                }
+                // currentLocationMarker가 null이 아닌 경우 InfoWindow를 연결
+                currentLocationMarker?.let { marker ->
+                    infoWindow.open(marker)  // InfoWindow를 마커에 연결
+                }
+
                 naverMap.moveCamera(CameraUpdate.scrollTo(currentLatLng))
                 updateAddressMemo(currentLatLng)
 
@@ -190,12 +204,13 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    // 서버에서 기록 불러오기
+    // 서버에서 모든 메모를 불러오는 메서드 (share_memo 값 상관없이 전체 메모 불러오기)
     private fun loadMemosForUser(emailIndex: Int) {
         val retrofit = RetrofitHelper.getRetrofitInstance("http://fuciple0.dothome.co.kr/")
         val retrofitService = retrofit.create(RetrofitService::class.java)
 
-        val call = retrofitService.getMemos(emailIndex, 0)
+        // share_memo 값에 관계없이 모든 메모를 가져옴
+        val call = retrofitService.getMemos(emailIndex, -1)  // share_memo 값을 -1로 전달하여 조건을 무시
         call.enqueue(object : Callback<List<MemoResponse>> {
             override fun onResponse(call: Call<List<MemoResponse>>, response: Response<List<MemoResponse>>) {
                 if (response.isSuccessful) {
@@ -228,6 +243,20 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
             icon = MarkerIcons.BLACK  // 기본 아이콘 설정
             map = naverMap
         }
+
+        // 날짜 캡션 설정
+        val formattedDate = formatMemoDate(memo.date_memo)
+        if (formattedDate.isNotEmpty()) {
+            marker.captionText = formattedDate
+            marker.captionRequestedWidth = 200  // 캡션 너비 설정
+        }
+
+        // 공유된 메모인 경우 보조 캡션 추가
+        if (memo.share_memo == 1) {
+            marker.subCaptionText = "공유됨"
+            marker.subCaptionRequestedWidth = 200  // 보조 캡션 너비 설정
+        }
+
 
         // 마커 클릭 리스너 추가
         marker.setOnClickListener {
@@ -297,15 +326,32 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
+    //사용자가 지도에서 임의의 위치를 클릭하면 마커 생성
     private fun setupMapClickListener() {
         naverMap.setOnMapClickListener { _, coord ->
+            // 기존 마커 제거
             currentLocationMarker?.map = null
             userMarker?.map = null
 
+            // 터치한 위치에 새로운 마커 추가
             userMarker = Marker().apply {
                 position = coord
                 icon = MarkerIcons.RED
                 map = naverMap
+            }
+
+            // InfoWindow 생성 및 마커에 연결
+            val infoWindow = InfoWindow().apply {
+                adapter = object : InfoWindow.DefaultTextAdapter(requireContext()) {
+                    override fun getText(infoWindow: InfoWindow): CharSequence {
+                        return "새 메모"
+                    }
+                }
+            }
+
+            // userMarker가 null이 아닌 경우 InfoWindow를 연결
+            userMarker?.let { marker ->
+                infoWindow.open(marker)  // InfoWindow를 마커에 연결
             }
 
             Toast.makeText(context, "터치한 위치 - 위도: ${coord.latitude}, 경도: ${coord.longitude}", Toast.LENGTH_SHORT).show()
@@ -315,6 +361,21 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
     }
 
 
+    // 날짜 형식을 '24.10.4'로 변환하는 함수
+    private fun formatMemoDate(dateMemo: String?): String {
+        if (dateMemo.isNullOrEmpty()) return ""
+
+        // 날짜 형식 변환 (예: "2024-10-04" -> "24.10.4")
+        val inputFormat = java.text.SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val outputFormat = java.text.SimpleDateFormat("yy.MM.d", Locale.getDefault())
+
+        return try {
+            val date = inputFormat.parse(dateMemo)
+            date?.let { outputFormat.format(it) } ?: ""
+        } catch (e: Exception) {
+            ""
+        }
+    }
 
 }
 

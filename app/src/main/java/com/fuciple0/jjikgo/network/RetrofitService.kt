@@ -4,6 +4,7 @@ import com.fuciple0.jjikgo.data.LoginResponse
 import com.fuciple0.jjikgo.data.MemoResponse
 import com.fuciple0.jjikgo.data.NaverUserInfoResponse
 import com.fuciple0.jjikgo.data.RegisterResponse
+import com.fuciple0.jjikgo.data.SharedMemoData
 import com.fuciple0.jjikgo.data.UserResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -88,5 +89,10 @@ interface RetrofitService {
 
     @DELETE("Jjikgo/delete_memo.php")
     fun deleteMemo(@Query("id_memo") idMemo: Int): Call<String>
+
+
+    @GET("Jjikgo/get_shared_memo_data.php")
+    fun getSharedMemoData(): Call<List<SharedMemoData>>
+
 
 }

@@ -1,60 +1,69 @@
 package com.fuciple0.jjikgo.fragments
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.fuciple0.jjikgo.R
+import com.fuciple0.jjikgo.adapter.SharedMemoAdapter
+import com.fuciple0.jjikgo.data.MemoResponse
+import com.fuciple0.jjikgo.data.SharedMemoData
+import com.fuciple0.jjikgo.network.RetrofitHelper
+import com.fuciple0.jjikgo.network.RetrofitService
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [YourlistFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class YourlistFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var sharedMemoAdapter: SharedMemoAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_yourlist, container, false)
+        val view = inflater.inflate(R.layout.fragment_yourlist, container, false)
+
+        // RecyclerView 설정
+        recyclerView = view.findViewById(R.id.recycler_view)
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+
+        // 서버에서 공유 메모 불러오기
+        loadSharedMemos()
+
+        return view
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment YourlistFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            YourlistFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+    // 서버에서 공유된 메모 불러오는 메서드
+    private fun loadSharedMemos() {
+        val retrofit = RetrofitHelper.getRetrofitInstance("http://fuciple0.dothome.co.kr/")
+        val retrofitService = retrofit.create(RetrofitService::class.java)
+
+        val call = retrofitService.getSharedMemoData()
+        call.enqueue(object : Callback<List<SharedMemoData>> {
+            override fun onResponse(call: Call<List<SharedMemoData>>, response: Response<List<SharedMemoData>>) {
+                if (response.isSuccessful) {
+                    val sharedMemoList = response.body()
+                    // 리스트를 역순으로 정렬하여 최신 메모가 맨 위에 오도록 설정
+                    sharedMemoList?.let {
+                        val reversedList = it.reversed()  // 리스트를 역순으로 정렬
+                        sharedMemoAdapter = SharedMemoAdapter(reversedList)
+                        recyclerView.adapter = sharedMemoAdapter
+                    }
+                } else {
+                    Log.e("YourlistFragment", "Failed to load shared memos: ${response.errorBody()?.string()}")
                 }
             }
+
+            override fun onFailure(call: Call<List<SharedMemoData>>, t: Throwable) {
+                Log.e("YourlistFragment", "Network error: ${t.message}")
+            }
+        })
     }
+
 }
