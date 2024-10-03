@@ -284,10 +284,6 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
     }
 
 
-
-
-
-
     // 위치 권한 요청 결과를 처리하는 메서드
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
@@ -317,6 +313,7 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
             updateAddressMemo(coord)
         }
     }
+
 
 
 }

@@ -104,6 +104,19 @@ class AddmemoFragment : BottomSheetDialogFragment() {
 
         // 이미지 선택 리스너
         binding.memoImage.setOnClickListener { clickSelect() }
+
+        // 삭제 버튼 처리
+        if (idMemo != -1) {
+            // id_memo가 있으면 삭제 버튼을 보이게 하고 클릭 리스너 추가
+            binding.tvDelete.visibility = View.VISIBLE
+            binding.tvDelete.setOnClickListener {
+                showDeleteConfirmationDialog(retrofitService, idMemo.toString())
+            }
+        } else {
+            // id_memo가 없으면 삭제 버튼을 숨김 상태로 유지
+            binding.tvDelete.visibility = View.INVISIBLE
+        }
+
     }
 
     private fun clickSelect() {
@@ -242,7 +255,7 @@ class AddmemoFragment : BottomSheetDialogFragment() {
                     //서버 저장 성공시에 기록한 좌표 저장
                     G.userlocation = LatLng(x!!.toDouble(), y!!.toDouble())
 
-                    Toast.makeText(requireContext(), "$result", Toast.LENGTH_SHORT).show()
+                    //Toast.makeText(requireContext(), "$result", Toast.LENGTH_SHORT).show()
 
                     dismiss()
                     (context as MainActivity).binding.bnv.selectedItemId = R.id.bnv_menu_location
@@ -314,7 +327,42 @@ class AddmemoFragment : BottomSheetDialogFragment() {
         })
     }
 
+    // 삭제 확인 다이얼로그를 표시하는 함수
+    private fun showDeleteConfirmationDialog(retrofitService: RetrofitService, idMemo: String) {
+        val builder = androidx.appcompat.app.AlertDialog.Builder(requireContext())
+        builder.setTitle("메모 삭제")
+        builder.setMessage("이 메모를 삭제하시겠습니까?")
 
+        builder.setPositiveButton("삭제") { dialog, _ ->
+            // 사용자가 삭제를 확인하면 실제로 메모 삭제 수행
+            deleteMemoFromServer(retrofitService, idMemo.toInt())
+            dialog.dismiss()
+        }
+
+        builder.setNegativeButton("취소") { dialog, _ ->
+            dialog.dismiss()  // 취소 시 다이얼로그 닫기
+        }
+
+        builder.show()
+    }
+
+    private fun deleteMemoFromServer(retrofitService: RetrofitService, idMemo: Int) {
+        retrofitService.deleteMemo(idMemo).enqueue(object : Callback<String> {
+            override fun onResponse(call: Call<String>, response: Response<String>) {
+                if (response.isSuccessful) {
+                    Toast.makeText(requireContext(), "메모가 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                    dismiss()  // BottomSheetDialogFragment 닫기
+                    (context as MainActivity).binding.bnv.selectedItemId = R.id.bnv_menu_location
+                } else {
+                    Toast.makeText(requireContext(), "메모 삭제 실패: ${response.errorBody()?.string()}", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<String>, t: Throwable) {
+                Toast.makeText(requireContext(), "네트워크 오류: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
 
 
 }

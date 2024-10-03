@@ -8,6 +8,7 @@ import com.fuciple0.jjikgo.data.UserResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Call
+import retrofit2.http.DELETE
 import retrofit2.http.Field
 import retrofit2.http.FieldMap
 import retrofit2.http.FormUrlEncoded
@@ -85,6 +86,7 @@ interface RetrofitService {
         @Part filePart: MultipartBody.Part? // 이미지 파일이 있을 때만 추가
     ): Call<String>
 
-
+    @DELETE("Jjikgo/delete_memo.php")
+    fun deleteMemo(@Query("id_memo") idMemo: Int): Call<String>
 
 }
