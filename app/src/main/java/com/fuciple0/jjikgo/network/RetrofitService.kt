@@ -95,4 +95,15 @@ interface RetrofitService {
     fun getSharedMemoData(): Call<List<SharedMemoData>>
 
 
+    // 범위 내의 메모를 가져오는 메서드
+    @GET("Jjikgo/getMemosInBounds.php")
+    fun getMemosInBounds(
+        @Query("centerLat") centerLat: Double,
+        @Query("centerLng") centerLng: Double,
+        @Query("swLat") swLat: Double,  // 남서쪽 경계의 위도
+        @Query("swLng") swLng: Double,  // 남서쪽 경계의 경도
+        @Query("neLat") neLat: Double,  // 북동쪽 경계의 위도
+        @Query("neLng") neLng: Double   // 북동쪽 경계의 경도
+    ): Call<List<MemoResponse>>
+
 }

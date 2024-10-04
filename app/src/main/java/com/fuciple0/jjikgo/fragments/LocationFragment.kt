@@ -27,6 +27,7 @@ import com.bumptech.glide.request.transition.Transition
 import com.fuciple0.jjikgo.G
 import com.fuciple0.jjikgo.R
 import com.fuciple0.jjikgo.data.CircleImageTransform
+import com.fuciple0.jjikgo.data.ClusterItemKey
 import com.fuciple0.jjikgo.data.MemoDatabaseHelper
 import com.fuciple0.jjikgo.data.MemoResponse
 import com.fuciple0.jjikgo.databinding.FragmentLocationBinding
@@ -38,6 +39,7 @@ import com.naver.maps.map.CameraUpdate
 import com.naver.maps.map.MapFragment
 import com.naver.maps.map.NaverMap
 import com.naver.maps.map.OnMapReadyCallback
+import com.naver.maps.map.clustering.Clusterer
 import com.naver.maps.map.overlay.InfoWindow
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
@@ -60,6 +62,18 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
     private var addressMemo: String = ""
     private var x: String = ""
     private var y: String = ""
+
+    private var lastCameraPosition: LatLng? = null
+    private val MIN_DISTANCE_THRESHOLD = 200 // 최소 거리 임계값 (미터)
+
+    // 마커를 관리할 리스트
+    private val markers = mutableListOf<Marker>()
+    // 클러스터링
+    private var clusterManager: Clusterer<ClusterItemKey>? = null
+    private var isClusteringEnabled = false
+    // 줌레벨
+    private var lastZoomLevel: Double? = null
+
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
@@ -139,8 +153,28 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
         }
 
         checkLocationPermissionAndUpdateLocation()
+        // 클러스터 매니저 초기화
+        clusterManager = Clusterer.ComplexBuilder<ClusterItemKey>().build()
 
-        loadMemosForUser(emailIndex.toInt())
+
+        // 카메라가 멈췄을 때 (지도가 완전히 이동을 끝낸 후) 호출
+        naverMap.addOnCameraIdleListener {
+            val cameraPosition = naverMap.cameraPosition.target
+            val zoomLevel = naverMap.cameraPosition.zoom
+
+            if (shouldUpdateMarkers(cameraPosition)) {
+                if (zoomLevel <= 12) {
+                    enableClustering()  // 줌 레벨이 12 이하이면 클러스터링 활성화
+                } else {
+                    disableClustering()  // 줌 레벨이 13 이상이면 개별 마커 표시
+                }
+                updateMarkersBasedOnCameraPosition()
+                lastCameraPosition = cameraPosition  // 현재 카메라 위치 저장
+            }
+        }
+
+
+        //loadMemosForUser(emailIndex.toInt())
 
         setupMapClickListener()
     }
@@ -244,6 +278,8 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
             icon = MarkerIcons.BLACK  // 기본 아이콘 설정
             map = naverMap
         }
+        // 마커를 리스트에 추가
+        markers.add(marker)
 
         // 날짜 캡션 설정
         val formattedDate = formatMemoDate(memo.date_memo)
@@ -305,8 +341,8 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
             putFloat("rating", memo.score_memo.toFloat())
             putString("memoText", memo.text_memo)
             putString("imageUrl", memo.img_memo)
-            putString("x", memo.x_memo)
-            putString("y", memo.y_memo)
+            putString("x", memo.x_memo.toString())
+            putString("y", memo.y_memo.toString())
             putString("dateMemo", memo.date_memo)
             putInt("id_memo", memo.id_memo)  // id_memo 추가
         }
@@ -342,7 +378,6 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
                 icon = MarkerIcons.RED
                 map = naverMap
             }
-
             // InfoWindow 생성 및 마커에 연결
             val infoWindow = InfoWindow().apply {
                 adapter = object : InfoWindow.DefaultTextAdapter(requireContext()) {
@@ -351,13 +386,11 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
                     }
                 }
             }
-
             // userMarker가 null이 아닌 경우 InfoWindow를 연결
             userMarker?.let { marker ->
                 infoWindow.open(marker)  // InfoWindow를 마커에 연결
             }
-
-            Toast.makeText(context, "터치한 위치 - 위도: ${coord.latitude}, 경도: ${coord.longitude}", Toast.LENGTH_SHORT).show()
+            //Toast.makeText(context, "터치한 위치 - 위도: ${coord.latitude}, 경도: ${coord.longitude}", Toast.LENGTH_SHORT).show()
             naverMap.moveCamera(CameraUpdate.scrollTo(coord))
             updateAddressMemo(coord)
         }
@@ -379,6 +412,133 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
             ""
         }
     }
+
+
+    // 두 위치 사이의 거리가 일정 거리 이상이거나 줌 레벨이 변화한 경우에만 업데이트 수행
+    private fun shouldUpdateMarkers(newPosition: LatLng): Boolean {
+        val currentZoomLevel = naverMap.cameraPosition.zoom
+        lastCameraPosition?.let { lastPosition ->
+            // 두 좌표 간의 거리 계산
+            val results = FloatArray(1)
+            Location.distanceBetween(
+                lastPosition.latitude, lastPosition.longitude,
+                newPosition.latitude, newPosition.longitude,
+                results
+            )
+            val distance = results[0]
+            Log.d("LocationFragment777", "Distance between positions: $distance meters")
+
+            // 이동 거리가 임계값 이상이거나 줌 레벨이 변경된 경우
+            if (distance > MIN_DISTANCE_THRESHOLD || lastZoomLevel != currentZoomLevel) {
+                lastZoomLevel = currentZoomLevel  // 줌 레벨 업데이트
+                return true  // 업데이트 수행
+            }
+            return false
+        }
+
+        // lastCameraPosition이 null인 경우, 업데이트 수행
+        lastZoomLevel = currentZoomLevel
+        return true
+    }
+
+    // 카메라 위치와 줌 레벨을 기반으로 마커 업데이트
+    private fun updateMarkersBasedOnCameraPosition() {
+        val cameraPosition = naverMap.cameraPosition
+        val zoomLevel = cameraPosition.zoom
+        val centerLatLng = cameraPosition.target
+
+        val visibleRegion = naverMap.contentBounds
+
+        // 현재 화면의 경계 좌표를 가져옴
+        val southwest = visibleRegion.southWest
+        val northeast = visibleRegion.northEast
+
+        // 로그 출력 (카메라 위치, 줌 레벨, 경계 좌표 등)
+        Log.d("LocationFragment777", "Camera position: Lat = ${centerLatLng.latitude}, Lng = ${centerLatLng.longitude}")
+        Log.d("LocationFragment777", "Zoom level: $zoomLevel")
+        Log.d("LocationFragment777", "Southwest: Lat = ${southwest.latitude}, Lng = ${southwest.longitude}")
+        Log.d("LocationFragment777", "Northeast: Lat = ${northeast.latitude}, Lng = ${northeast.longitude}")
+
+        // 데이터베이스 쿼리를 수정하여 현재 경계 안에 있는 데이터만 불러옴
+        loadNearbyMemos(centerLatLng, zoomLevel, southwest, northeast)
+    }
+
+
+    // 카메라 위치와 줌 레벨을 기반으로 범위 내의 메모를 불러오는 메서드
+    private fun loadNearbyMemos(center: LatLng, zoomLevel: Double, southwest: LatLng, northeast: LatLng) {
+        val retrofit = RetrofitHelper.getRetrofitInstance("http://fuciple0.dothome.co.kr/")
+        val retrofitService = retrofit.create(RetrofitService::class.java)
+
+        // Retrofit 호출: 범위 내 메모 가져오기
+        val call = retrofitService.getMemosInBounds(
+            center.latitude, center.longitude,
+            southwest.latitude, southwest.longitude,
+            northeast.latitude, northeast.longitude
+        )
+
+        call.enqueue(object : Callback<List<MemoResponse>> {
+            override fun onResponse(call: Call<List<MemoResponse>>, response: Response<List<MemoResponse>>) {
+                if (response.isSuccessful) {
+                    val memos = response.body()
+                    Log.d("LocationFragment777", "Number of memos retrieved: ${memos?.size ?: 0}")
+
+                    if (isClusteringEnabled) {
+                        memos?.forEach { memo ->
+                            addClusterItem(memo)  // 클러스터 아이템 추가
+                        }
+                        clusterManager?.map = naverMap
+                    } else {
+                        clearExistingMarkers()
+                        memos?.forEach { memo ->
+                            addMarkerForMemo(memo)  // 개별 마커 추가
+                        }
+                    }
+                }else {
+                    Log.e("LocationFragment", "Failed to load memos: ${response.errorBody()?.string()}")
+                }
+            }
+
+            override fun onFailure(call: Call<List<MemoResponse>>, t: Throwable) {
+                Log.e("LocationFragment", "Network error: ${t.message}")
+            }
+        })
+    }
+
+
+    // 기존 마커들을 제거하는 메서드
+    private fun clearExistingMarkers() {
+        for (marker in markers) {
+            marker.map = null  // 지도에서 마커 제거
+        }
+        markers.clear()  // 리스트 초기화
+    }
+
+    private val clusterItems = mutableListOf<ClusterItemKey>()
+
+
+    private fun enableClustering() {
+        if (!isClusteringEnabled) {
+            clearExistingMarkers()  // 클러스터링 시작 시 기존 마커 제거
+            clusterManager?.removeAll(clusterItems)  // 클러스터 항목 모두 제거
+            isClusteringEnabled = true
+        }
+    }
+
+    private fun disableClustering() {
+        if (isClusteringEnabled) {
+            clusterManager?.removeAll(clusterItems)  // 클러스터 항목 삭제
+            isClusteringEnabled = false
+        }
+    }
+
+    private fun addClusterItem(memo: MemoResponse) {
+        val key = ClusterItemKey(memo, LatLng(memo.x_memo.toDouble(), memo.y_memo.toDouble()))
+        clusterItems.add(key)
+        clusterManager?.add(key, memo)
+    }
+
+
+
 
 }
 
