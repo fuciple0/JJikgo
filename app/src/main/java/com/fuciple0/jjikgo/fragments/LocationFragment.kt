@@ -7,6 +7,7 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.location.Geocoder
 import android.location.Location
@@ -249,12 +250,14 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
         if (formattedDate.isNotEmpty()) {
             marker.captionText = formattedDate
             marker.captionRequestedWidth = 200  // 캡션 너비 설정
+            marker.captionColor = Color.GRAY
         }
 
         // 공유된 메모인 경우 보조 캡션 추가
         if (memo.share_memo == 1) {
             marker.subCaptionText = "공유됨"
             marker.subCaptionRequestedWidth = 200  // 보조 캡션 너비 설정
+            marker.subCaptionColor = Color.rgb(43, 92, 191)
         }
 
 

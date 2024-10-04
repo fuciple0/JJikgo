@@ -48,10 +48,16 @@ class SharedMemoAdapter(private val sharedMemoList: List<SharedMemoData>) :
             .load("http://fuciple0.dothome.co.kr/Jjikgo/${sharedMemo.userProfile}")
             .into(holder.binding.userProfile)
 
-        // 메모 이미지 로드 (Glide 사용)
-        Glide.with(holder.itemView.context)
-            .load("http://fuciple0.dothome.co.kr/Jjikgo/${sharedMemo.memoImage}")
-            .into(holder.binding.iv)
+        // 메모 이미지 로드 (Glide 사용), 이미지가 없을 경우 ImageView 숨김
+        if (sharedMemo.memoImage.isNullOrEmpty()) {
+            holder.binding.iv.visibility = View.GONE // 이미지가 없으면 ImageView 숨김
+            holder.binding.bookmarkIcon.visibility = View.GONE
+        } else {
+            holder.binding.iv.visibility = View.VISIBLE // 이미지가 있으면 보여줌
+            Glide.with(holder.itemView.context)
+                .load("http://fuciple0.dothome.co.kr/Jjikgo/${sharedMemo.memoImage}")
+                .into(holder.binding.iv)
+        }
 
         // 북마크 상태 초기값 설정 (필요시 저장된 상태를 가져올 수 있음)
         var isBookmarked = false
