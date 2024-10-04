@@ -19,6 +19,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.request.RequestOptions
@@ -30,6 +31,7 @@ import com.fuciple0.jjikgo.data.CircleImageTransform
 import com.fuciple0.jjikgo.data.ClusterItemKey
 import com.fuciple0.jjikgo.data.MemoDatabaseHelper
 import com.fuciple0.jjikgo.data.MemoResponse
+import com.fuciple0.jjikgo.data.MemoViewModel
 import com.fuciple0.jjikgo.databinding.FragmentLocationBinding
 import com.fuciple0.jjikgo.network.RetrofitHelper
 import com.fuciple0.jjikgo.network.RetrofitService
@@ -73,6 +75,8 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
     private var isClusteringEnabled = false
     // 줌레벨
     private var lastZoomLevel: Double? = null
+    // 메모 뷰모델
+    private val memoViewModel: MemoViewModel by activityViewModels()
 
 
     companion object {
@@ -481,6 +485,9 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
                 if (response.isSuccessful) {
                     val memos = response.body()
                     Log.d("LocationFragment777", "Number of memos retrieved: ${memos?.size ?: 0}")
+
+                    // ViewModel에 데이터 저장
+                    memoViewModel.memoList.postValue(memos)
 
                     if (isClusteringEnabled) {
                         memos?.forEach { memo ->

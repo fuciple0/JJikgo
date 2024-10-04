@@ -97,6 +97,17 @@
         android:text="고기가 맛있다. 정말 맛있다. 복음밥도 맛있다. 고기가 맛있다. 정말 맛있다. 복음밥도 맛있다.고기가 맛있다. 정말 맛있다. 복음밥도 맛있다 " />
 
 
-
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/user_profile"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:src="@drawable/dummy_2"
+        android:layout_marginTop="120dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginRight="4dp"
+        app:civ_border_width="1dp"
+        app:civ_border_color="#E4E4E4"
+        />
 
 </RelativeLayout>

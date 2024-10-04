@@ -1,47 +1,57 @@
 package com.fuciple0.jjikgo.adapter
 
-import android.graphics.BitmapFactory
+import com.bumptech.glide.Glide
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.fuciple0.jjikgo.R
-import com.fuciple0.jjikgo.data.MemoDatabaseHelper.Memo
-import com.google.android.material.imageview.ShapeableImageView
+import com.fuciple0.jjikgo.data.MemoResponse
+import com.fuciple0.jjikgo.databinding.RecyclerMyitem2Binding
+import com.fuciple0.jjikgo.databinding.RecyclerMyitemBinding
 
-class MemoAdapter(private val memoList: List<Memo>) : RecyclerView.Adapter<MemoAdapter.MemoViewHolder>() {
 
-    class MemoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val imageView: ShapeableImageView = itemView.findViewById(R.id.iv)
-        val titleTextView: TextView = itemView.findViewById(R.id.tv_title)
-        val timeTextView: TextView = itemView.findViewById(R.id.tv_time)
-        val ratingTextView: TextView = itemView.findViewById(R.id.tv_rating)
-        val bodyTextView: TextView = itemView.findViewById(R.id.tv_body)
-    }
+class MemoAdapter(private var memoList: MutableList<MemoResponse>) : RecyclerView.Adapter<MemoAdapter.MemoViewHolder>() {
+
+    class MemoViewHolder(val binding: RecyclerMyitem2Binding) : RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MemoViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.recycler_myitem, parent, false)
-        return MemoViewHolder(view)
+        val binding = RecyclerMyitem2Binding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return MemoViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: MemoViewHolder, position: Int) {
         val memo = memoList[position]
-        holder.titleTextView.text = memo.address // 주소를 제목으로 표시
-        holder.timeTextView.text = memo.dateTime // 저장된 날짜 및 시간
-        holder.ratingTextView.text = memo.rating.toInt().toString() // 평점 표시
-        holder.bodyTextView.text = memo.memo // 메모 내용 표시
+        holder.binding.tvAddr.text = memo.addr_memo
+        holder.binding.tvTime.text = memo.date_memo
+        holder.binding.tvRating.text = memo.score_memo.toString()
+        holder.binding.tvBody.text = memo.text_memo
 
-        // BLOB에서 비트맵 생성 후 이미지뷰에 설정
-        memo.imageBlob?.let { blob ->
-            val bitmap = BitmapFactory.decodeByteArray(blob, 0, blob.size)
-            holder.imageView.setImageBitmap(bitmap)
-        } ?: run {
-            holder.imageView.setImageResource(R.drawable.no_image) // 기본 이미지
+        // 프로필 이미지 로드 (Glide 사용)
+//        Glide.with(holder.itemView.context)
+//            .load("http://fuciple0.dothome.co.kr/Jjikgo/${memo.email_index}")
+//            .into(holder.binding.userProfile)
+
+        // 메모 이미지 로드 (Glide 사용), 이미지가 없을 경우 ImageView 숨김
+        if (memo.img_memo.isNullOrEmpty()) {
+            holder.binding.iv.visibility = View.GONE
+        } else {
+            holder.binding.iv.visibility = View.VISIBLE
+            Glide.with(holder.itemView.context)
+                .load("http://fuciple0.dothome.co.kr/Jjikgo/${memo.img_memo}")
+                .into(holder.binding.iv)
         }
     }
 
-    override fun getItemCount(): Int {
-        return memoList.size
+    override fun getItemCount(): Int = memoList.size
+
+    // ViewModel의 LiveData와 연결되는 메서드 수정
+    fun updateMemoList(newMemoList: List<MemoResponse>) {
+        memoList.clear()
+        memoList.addAll(newMemoList)
+        notifyDataSetChanged()
     }
 }
+
+
+
+

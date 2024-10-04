@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="16dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="6dp">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        >
+        <!-- 이미지 섹션 -->
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/iv"
+            android:layout_width="190dp"
+            android:layout_height="140dp"
+            android:scaleType="centerCrop"
+            android:adjustViewBounds="true"
+            app:shapeAppearanceOverlay="@style/Circle2"
+            app:srcCompat="@drawable/dummy_4" />
+
+
+        <!-- 텍스트 섹션 -->
+        <TextView
+            android:id="@+id/tv_addr"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:textStyle="bold"
+            android:text="서울 성동구 성수동 1가 14-76 " />
+
+            <LinearLayout
+                android:id="@+id/sec2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                >
+
+                <TextView
+                    android:layout_width="14dp"
+                    android:layout_height="14dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="5dp"
+                    android:background="@drawable/baseline_star_24"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/tv_rating"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="5"
+                    android:textColor="#FF0000"
+                    />
+
+                <TextView
+                    android:id="@+id/tv_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:text="2024-08-09"
+                    android:textColor="#898989"
+                    />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_body"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="8dp"
+                android:text="고기가sdfasdfasdf음밥도 맛있다. 고기가 맛있다. 정ddadfasdfasdf말 맛있다. 복음밥도 맛있다.고기가 맛있다. 정말 맛있다. 복음밥도 맛있다 " />
+
+
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"-->
+<!--    android:layout_width="200dp"-->
+<!--    android:layout_height="wrap_content"-->
+<!--    xmlns:app="http://schemas.android.com/apk/res-auto"-->
+<!--    android:background="@color/white"-->
+<!--    android:layout_margin="8dp">-->
+
+<!--    <TextView-->
+<!--        android:id="@+id/tv_addr"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:paddingTop="4dp"-->
+<!--        android:paddingRight="8dp"-->
+<!--        android:paddingLeft="8dp"-->
+<!--        android:textStyle="bold"-->
+<!--        android:text="서울 성동구 성수동 1가 14-76 " />-->
+
+
+<!--    <LinearLayout-->
+<!--        android:id="@+id/sec2"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:orientation="horizontal"-->
+<!--        android:layout_below="@+id/tv_addr"-->
+<!--        >-->
+
+<!--        <TextView-->
+<!--            android:layout_width="14dp"-->
+<!--            android:layout_height="14dp"-->
+<!--            android:layout_alignParentStart="true"-->
+<!--            android:layout_marginStart="8dp"-->
+<!--            android:layout_marginTop="5dp"-->
+<!--            android:background="@drawable/baseline_star_24"-->
+<!--            android:textSize="16sp" />-->
+
+<!--        <TextView-->
+<!--            android:id="@+id/tv_rating"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="5"-->
+<!--            android:textColor="#FF0000"-->
+<!--            />-->
+
+<!--        <TextView-->
+<!--            android:id="@+id/tv_time"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginLeft="8dp"-->
+<!--            android:text="2024-08-09"-->
+<!--            android:textColor="#898989"-->
+<!--            />-->
+
+<!--    </LinearLayout>-->
+
+<!--    <TextView-->
+<!--        android:id="@+id/tv_body"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_below="@id/sec2"-->
+<!--        android:paddingTop="4dp"-->
+<!--        android:paddingRight="8dp"-->
+<!--        android:paddingLeft="8dp"-->
+<!--        android:text="고기가sdfasdfasdf음밥도 맛있다. 고기가 맛있다. 정ddadfasdfasdf말 맛있다. 복음밥도 맛있다.고기가 맛있다. 정말 맛있다. 복음밥도 맛있다 " />-->
+
+<!--    <FrameLayout-->
+<!--        android:id="@+id/sec4"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_below="@id/tv_body">-->
+
+<!--        <com.google.android.material.imageview.ShapeableImageView-->
+<!--            android:id="@+id/iv"-->
+<!--            android:layout_width="140dp"-->
+<!--            android:layout_height="140dp"-->
+<!--            android:scaleType="centerCrop"-->
+<!--            android:layout_marginTop="12dp"-->
+<!--            android:layout_marginLeft="8dp"-->
+<!--            android:layout_marginBottom="8dp"-->
+<!--            android:adjustViewBounds="true"-->
+<!--            app:shapeAppearanceOverlay="@style/Circle"-->
+<!--            app:srcCompat="@drawable/dummy_3" />-->
+<!--    </FrameLayout>-->
+<!--</RelativeLayout>-->

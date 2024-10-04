@@ -5,39 +5,49 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.fuciple0.jjikgo.R
 import com.fuciple0.jjikgo.adapter.MemoAdapter
-import com.fuciple0.jjikgo.data.MemoDatabaseHelper
+import com.fuciple0.jjikgo.data.MemoViewModel
+import com.fuciple0.jjikgo.databinding.FragmentMylistBinding
 
 class MylistFragment : Fragment() {
 
-    private lateinit var recyclerView: RecyclerView
+    private var _binding: FragmentMylistBinding? = null
+    private val binding get() = _binding!!
     private lateinit var memoAdapter: MemoAdapter
-    private lateinit var dbHelper: MemoDatabaseHelper
+    private val memoViewModel: MemoViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return inflater.inflate(R.layout.fragment_mylist, container, false)
+        _binding = FragmentMylistBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         // RecyclerView 설정
-        recyclerView = view.findViewById(R.id.recycler_view)
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        dbHelper = MemoDatabaseHelper(requireContext())
+        memoAdapter = MemoAdapter(mutableListOf())
+        binding.recyclerView.apply {
+            layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL) // 2열의 불규칙한 그리드
+            adapter = memoAdapter
+        }
 
-        loadMemos()
+        // ViewModel에서 메모 데이터를 관찰하여 업데이트
+        memoViewModel.memoList.observe(viewLifecycleOwner, Observer { memos ->
+            memoAdapter.updateMemoList(memos ?: mutableListOf())  // 데이터가 null일 경우 빈 리스트로 대체
+        })
     }
 
-    private fun loadMemos() {
-        val memos = dbHelper.getAllMemos() // 데이터베이스에서 모든 메모 가져오기
-        memoAdapter = MemoAdapter(memos) // 어댑터 생성
-        recyclerView.adapter = memoAdapter // 리사이클러뷰에 어댑터 설정
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
+

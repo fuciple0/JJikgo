@@ -76,6 +76,6 @@ dependencies {
     //글라이드
     implementation("com.github.bumptech.glide:glide:4.16.0")
 
-
+    implementation("androidx.fragment:fragment-ktx:1.3.6")
 
 }
