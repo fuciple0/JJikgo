@@ -8,7 +8,7 @@
     <style name="Theme.JJikgo" parent="Base.Theme.JJikgo" />
 
     <style name="Circle">
-        <item name="cornerSize">20%</item>
+        <item name="cornerSize">15%</item>
     </style>
 
 </resources>

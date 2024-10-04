@@ -62,13 +62,6 @@ class MypageFragment : Fragment() {
             }
         }
 
-
-
-        // 로그아웃 버튼 클릭 리스너 설정
-        binding.btnLogout.setOnClickListener {
-            logout()
-        }
-
         return binding.root
     }
 

@@ -104,13 +104,14 @@
             android:id="@+id/tv_follow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_box"
+            android:background="@drawable/bg_box_bluelight"
             android:paddingLeft="8dp"
             android:paddingTop="4dp"
             android:paddingRight="8dp"
             android:paddingBottom="4dp"
             android:layout_marginLeft="85dp"
             android:text="팔로우"
+            android:textColor="#406CC5"
             />
 
     </LinearLayout>
@@ -173,30 +174,42 @@
         android:paddingLeft="8dp"
         android:text="고기가sdfasdfasdf음밥도 맛있다. 고기가 맛있다. 정ddadfasdfasdf말 맛있다. 복음밥도 맛있다.고기가 맛있다. 정말 맛있다. 복음밥도 맛있다 " />
 
-
-
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/iv"
-        android:layout_width="140dp"
-        android:layout_height="140dp"
-        android:scaleType="centerCrop"
-        android:layout_below="@id/tv_body"
-        android:layout_marginTop="12dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginBottom="8dp"
-        android:adjustViewBounds="true"
-        app:shapeAppearanceOverlay="@style/Circle"
-        app:srcCompat="@drawable/dummy_3" />
-
-
-    <LinearLayout
+    <FrameLayout
+        android:id="@+id/sec4"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_below="@+id/iv"
-        android:gravity="center_vertical"
-        android:layout_marginBottom="12dp"
-        android:layout_marginTop="2dp">
+        android:layout_below="@id/tv_body">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/iv"
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            android:scaleType="centerCrop"
+            android:layout_marginTop="12dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginBottom="8dp"
+            android:adjustViewBounds="true"
+            app:shapeAppearanceOverlay="@style/Circle"
+            app:srcCompat="@drawable/dummy_3" />
+
+        <ImageView
+            android:id="@+id/bookmarkIcon"
+            android:layout_width="35dp"
+            android:layout_height="40dp"
+            android:layout_gravity="end|bottom|left"
+            android:layout_marginLeft="12dp"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/ic_bookmark_border"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="bottom|right"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp"
+            android:layout_marginRight="16dp"
+            >
 
         <LinearLayout
             android:id="@+id/sec3"
@@ -221,11 +234,15 @@
                 android:layout_marginLeft="4dp"
                 android:layout_marginRight="12dp"
                 android:textColor="#7D7D7D"
-                android:textSize="16dp"
+                android:textSize="14dp"
                 />
         </LinearLayout>
 
-    </LinearLayout>
+        </LinearLayout>
+    </FrameLayout>
+
+
+
 
 
 
