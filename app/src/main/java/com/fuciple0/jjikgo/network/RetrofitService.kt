@@ -1,5 +1,6 @@
 package com.fuciple0.jjikgo.network
 
+import com.fuciple0.jjikgo.data.KakoSearchPlaceResponse
 import com.fuciple0.jjikgo.data.LoginResponse
 import com.fuciple0.jjikgo.data.MemoResponse
 import com.fuciple0.jjikgo.data.NaverUserInfoResponse
@@ -15,6 +16,7 @@ import retrofit2.http.FieldMap
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Headers
 import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.Part
@@ -37,6 +39,17 @@ interface RetrofitService {
 
     @GET("/v1/nid/me")
     fun getNaverUserInfo(@Header("Authorization") authorization:String): Call<NaverUserInfoResponse>
+
+    @Headers("Authorization: KakaoAK 63eca92fa882ec93e04b7c7dd8f4641b")
+    @GET("/v2/local/search/keyword.json?sort=distance")
+    fun searchPlacesFromServer(@Query("query") query:String,@Query("x") longitude:String,@Query("y") latitude:String) : Call<String>
+
+    @Headers("Authorization: KakaoAK 63eca92fa882ec93e04b7c7dd8f4641b")
+    @GET("/v2/local/search/keyword.json?sort=distance")
+    fun searchPlacesFromServer2(@Query("query") query:String,@Query("x") longitude:String,@Query("y") latitude:String) : Call<KakoSearchPlaceResponse>
+
+
+
 
 
     // 이메일 중복 확인 API

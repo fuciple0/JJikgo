@@ -17,6 +17,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -51,6 +52,7 @@ import java.util.Locale
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import retrofit2.Retrofit
 
 class LocationFragment : Fragment(), OnMapReadyCallback {
 
@@ -77,9 +79,13 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
     private var lastZoomLevel: Double? = null
     // 메모 뷰모델
     private val memoViewModel: MemoViewModel by activityViewModels()
+    // 검색 장소명
+    var searchQuery:String= ""
+    var mylocation:LatLng? = null
+    var mylocationresult:LatLng? = null
 
 
-    companion object {
+        companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
     }
 
@@ -94,6 +100,14 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentLocationBinding.inflate(inflater, container, false)
+
+        // 전달된 Bundle 값에서 좌표 정보 가져오기
+        val longitude = arguments?.getDouble("longitude", 0.0) ?: 0.0
+        val latitude = arguments?.getDouble("latitude", 0.0) ?: 0.0
+
+        if (longitude != 0.0 && latitude != 0.0) {
+            mylocationresult = LatLng(latitude, longitude)  // Bundle로 전달된 좌표를 mylocationresult 변수에 저장
+        }
 
         setupMapFragment()
         setupClickListeners()
@@ -112,6 +126,23 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
     private fun setupClickListeners() {
         binding.mylocationFab.setOnClickListener { checkLocationPermissionAndUpdateLocation() }
         binding.addMemoFab.setOnClickListener { showAddMemoBottomSheet() }
+        // 상단 Edit텍스트박스 클릭 리스너
+        binding.input.setOnClickListener {
+            // LocalSearchFragment 인스턴스 생성
+            val localSearchFragment = LocalSearchFragment()
+            // Bundle을 사용해 mylocation 값을 전달
+            val bundle = Bundle().apply {
+                putDouble("longitude", mylocation?.longitude ?: 0.0)
+                putDouble("latitude", mylocation?.latitude ?: 0.0)
+            }
+            localSearchFragment.arguments = bundle
+            // FragmentManager를 통해 새로운 프래그먼트로 이동
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, localSearchFragment) // fragment_container는 현재 프래그먼트를 담고 있는 레이아웃의 ID입니다.
+                .addToBackStack(null)  // 뒤로 가기 버튼을 눌렀을 때 이전 프래그먼트로 돌아가기 위해 추가
+                .commit()
+        }
+
     }
 
     private fun showAddMemoBottomSheet() {
@@ -133,7 +164,8 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
         val geocoder = Geocoder(requireContext(), Locale.getDefault())
         val addressList = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)
         addressMemo = if (!addressList.isNullOrEmpty()) {
-            addressList[0].getAddressLine(0)
+            // "대한민국"을 제거하고 나머지 주소만 저장
+            addressList[0].getAddressLine(0).replace("대한민국", "").trim()
         } else {
             "주소를 찾을 수 없습니다."
         }
@@ -156,7 +188,26 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
             return
         }
 
-        checkLocationPermissionAndUpdateLocation()
+        // mylocationresult 값이 있으면 검색 결과에 기반하여 카메라 이동 및 마커 추가
+        if (mylocationresult != null) {
+            mylocationresult?.let {
+                val cameraUpdate = CameraUpdate.scrollTo(it)
+                naverMap.moveCamera(cameraUpdate)
+
+                // 마커를 추가
+                val marker = Marker().apply {
+                    position = it
+                    icon = MarkerIcons.GREEN
+                    map = naverMap
+                }
+                currentLocationMarker = marker
+                updateAddressMemo(mylocationresult!!)
+            }
+        } else {
+            // mylocationresult 값이 없으면 현재 위치를 갱신하는 메서드 실행
+            checkLocationPermissionAndUpdateLocation()
+        }
+
         // 클러스터 매니저 초기화
         clusterManager = Clusterer.ComplexBuilder<ClusterItemKey>().build()
 
@@ -177,8 +228,6 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
             }
         }
 
-
-        //loadMemosForUser(emailIndex.toInt())
 
         setupMapClickListener()
     }
@@ -235,6 +284,7 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
 
                 naverMap.moveCamera(CameraUpdate.scrollTo(currentLatLng))
                 updateAddressMemo(currentLatLng)
+                mylocation = currentLatLng
 
                 Toast.makeText(context, "현재 위치 - 위도: ${currentLatLng.latitude}, 경도: ${currentLatLng.longitude}", Toast.LENGTH_SHORT).show()
             } ?: run {

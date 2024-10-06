@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".fragments.LocationFragment"
+    android:background="@color/white">
+
+
+    <EditText
+        android:id="@+id/input"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:hint=" 장소, 주소 검색 "
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="24dp"
+        android:layout_marginRight="24dp"
+        android:background="@drawable/edit_box"
+        android:elevation="5dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:inputType="text"
+        android:imeOptions="actionSearch"
+        android:drawableStart="@drawable/baseline_arrow_back_24"
+        android:drawableEnd="@drawable/baseline_search_24"
+        />
+
+    <!-- 검색 결과를 표시할 RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/input"
+        android:layout_margin="16dp"
+        android:layout_weight="1"/>
+
+
+
+
+</RelativeLayout>
