@@ -2,4 +2,11 @@
     <string name="app_name">찍고</string>
 
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string-array name="menu_items">
+        <item>내 주변</item>
+        <item>최신순</item>
+    </string-array>
+
+
 </resources>

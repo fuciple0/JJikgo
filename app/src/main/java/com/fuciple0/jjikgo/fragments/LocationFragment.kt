@@ -81,7 +81,6 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
     private val memoViewModel: MemoViewModel by activityViewModels()
     // 검색 장소명
     var searchQuery:String= ""
-    var mylocation:LatLng? = null
     var mylocationresult:LatLng? = null
 
 
@@ -132,8 +131,8 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
             val localSearchFragment = LocalSearchFragment()
             // Bundle을 사용해 mylocation 값을 전달
             val bundle = Bundle().apply {
-                putDouble("longitude", mylocation?.longitude ?: 0.0)
-                putDouble("latitude", mylocation?.latitude ?: 0.0)
+                putDouble("longitude", G.mylocation?.longitude ?: 0.0)
+                putDouble("latitude", G.mylocation?.latitude ?: 0.0)
             }
             localSearchFragment.arguments = bundle
             // FragmentManager를 통해 새로운 프래그먼트로 이동
@@ -284,7 +283,7 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
 
                 naverMap.moveCamera(CameraUpdate.scrollTo(currentLatLng))
                 updateAddressMemo(currentLatLng)
-                mylocation = currentLatLng
+                G.mylocation = currentLatLng
 
                 Toast.makeText(context, "현재 위치 - 위도: ${currentLatLng.latitude}, 경도: ${currentLatLng.longitude}", Toast.LENGTH_SHORT).show()
             } ?: run {
@@ -292,37 +291,6 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
             }
         }
     }
-
-    // 서버에서 모든 메모를 불러오는 메서드 (share_memo 값 상관없이 전체 메모 불러오기)
-    private fun loadMemosForUser(emailIndex: Int) {
-        val retrofit = RetrofitHelper.getRetrofitInstance("http://fuciple0.dothome.co.kr/")
-        val retrofitService = retrofit.create(RetrofitService::class.java)
-
-        // share_memo 값에 관계없이 모든 메모를 가져옴
-        val call = retrofitService.getMemos(emailIndex, -1)  // share_memo 값을 -1로 전달하여 조건을 무시
-        call.enqueue(object : Callback<List<MemoResponse>> {
-            override fun onResponse(call: Call<List<MemoResponse>>, response: Response<List<MemoResponse>>) {
-                if (response.isSuccessful) {
-                    val memos = response.body()
-                    // 서버에서 받아온 데이터 로그로 출력
-                    Log.d("LocationFragment", "Received memos: $memos")
-
-                    memos?.forEach { memo ->
-                        // 각 메모 데이터 로그로 출력
-                        Log.d("LocationFragment", "Memo ID: ${memo.id_memo}, Address: ${memo.addr_memo}, Score: ${memo.score_memo}")
-                        addMarkerForMemo(memo)
-                    }
-                } else {
-                    Log.e("LocationFragment", "Failed to load memos: ${response.errorBody()?.string()}")
-                }
-            }
-
-            override fun onFailure(call: Call<List<MemoResponse>>, t: Throwable) {
-                Log.e("LocationFragment", "Network error: ${t.message}")
-            }
-        })
-    }
-
 
     // 마커에 이미지를 설정하는 최적화된 메서드
     private fun addMarkerForMemo(memo: MemoResponse) {
@@ -349,7 +317,6 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
             marker.subCaptionRequestedWidth = 200  // 보조 캡션 너비 설정
             marker.subCaptionColor = Color.rgb(43, 92, 191)
         }
-
 
         // 마커 클릭 리스너 추가
         marker.setOnClickListener {
@@ -536,8 +503,8 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
                     val memos = response.body()
                     Log.d("LocationFragment777", "Number of memos retrieved: ${memos?.size ?: 0}")
 
-                    // ViewModel에 데이터 저장
-                    memoViewModel.memoList.postValue(memos)
+                    // ViewModel에 데이터 저장 (주변 메모 리스트)
+                    memoViewModel.nearbyMemoList.postValue(memos)
 
                     if (isClusteringEnabled) {
                         memos?.forEach { memo ->
@@ -560,6 +527,7 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
             }
         })
     }
+
 
 
     // 기존 마커들을 제거하는 메서드

@@ -6,6 +6,7 @@ class G {
 
     companion object{
         var userlocation : LatLng? = null
+        var mylocation : LatLng? = null
     }
 
 

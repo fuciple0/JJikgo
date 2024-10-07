@@ -119,4 +119,10 @@ interface RetrofitService {
         @Query("neLng") neLng: Double   // 북동쪽 경계의 경도
     ): Call<List<MemoResponse>>
 
+    // 페이지 번호와 페이지 크기를 기반으로 최신 메모를 가져오는 API
+    @GET("Jjikgo/getMemosSortedByDate.php")
+    fun getMemosSortedByDate(
+        @Query("limit") limit: Int,  // 한 번에 불러올 메모 수
+        @Query("page") page: Int     // 페이지 번호
+    ): Call<List<MemoResponse>>
 }

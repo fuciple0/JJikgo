@@ -4,5 +4,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
 class MemoViewModel : ViewModel() {
-    val memoList = MutableLiveData<List<MemoResponse>>()
+    val nearbyMemoList = MutableLiveData<List<MemoResponse>>()  // 주변 메모 리스트
+    val allMemoList = MutableLiveData<List<MemoResponse>>()     // 최신 메모 리스트
 }

@@ -10,7 +10,23 @@ import com.fuciple0.jjikgo.databinding.RecyclerMyitem2Binding
 import com.fuciple0.jjikgo.databinding.RecyclerMyitemBinding
 
 
-class MemoAdapter(private var memoList: MutableList<MemoResponse>) : RecyclerView.Adapter<MemoAdapter.MemoViewHolder>() {
+class MemoAdapter(
+    private var memoList: MutableList<MemoResponse>,
+    private val onMemoClick: (MemoResponse) -> Unit  // 클릭 리스너 콜백 추가
+) : RecyclerView.Adapter<MemoAdapter.MemoViewHolder>() {
+
+    // 기존 데이터 업데이트 메서드
+    fun updateMemoList(newMemos: List<MemoResponse>) {
+        memoList = newMemos.toMutableList()
+        notifyDataSetChanged()  // RecyclerView를 새로고침
+    }
+
+    // 새로운 데이터를 기존 리스트에 추가하는 메서드
+    fun addMemoList(newMemos: List<MemoResponse>) {
+        val startPosition = memoList.size
+        memoList.addAll(newMemos)
+        notifyItemRangeInserted(startPosition, newMemos.size)  // 새로 추가된 항목만 새로고침
+    }
 
     class MemoViewHolder(val binding: RecyclerMyitem2Binding) : RecyclerView.ViewHolder(binding.root)
 
@@ -40,16 +56,16 @@ class MemoAdapter(private var memoList: MutableList<MemoResponse>) : RecyclerVie
                 .load("http://fuciple0.dothome.co.kr/Jjikgo/${memo.img_memo}")
                 .into(holder.binding.iv)
         }
+
+        // 아이템 클릭 리스너 설정
+        holder.itemView.setOnClickListener {
+            onMemoClick(memo)  // 클릭된 메모 데이터 전달
+        }
+
     }
 
     override fun getItemCount(): Int = memoList.size
 
-    // ViewModel의 LiveData와 연결되는 메서드 수정
-    fun updateMemoList(newMemoList: List<MemoResponse>) {
-        memoList.clear()
-        memoList.addAll(newMemoList)
-        notifyDataSetChanged()
-    }
 }
 
 
