@@ -14,6 +14,7 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.fuciple0.jjikgo.G
 import com.fuciple0.jjikgo.R
 import com.fuciple0.jjikgo.adapter.MemoAdapter
 import com.fuciple0.jjikgo.data.MemoResponse
@@ -110,11 +111,12 @@ class MylistFragment : Fragment() {
         val retrofit = RetrofitHelper.getRetrofitInstance("http://fuciple0.dothome.co.kr/")
         val retrofitService = retrofit.create(RetrofitService::class.java)
 
+        val emailIndex = G.emailIndex  // G 클래스에서 emailIndex 값을 가져옴
         Log.d("MylistFragment888", "Loading page $page with pageSize $pageSize")
 
 
         // 최신 메모를 페이지별로 불러오기 위한 Retrofit 호출
-        val call = retrofitService.getMemosSortedByDate(pageSize, page)
+        val call = retrofitService.getMemosSortedByDate(pageSize, page, emailIndex!!.toInt())
         call.enqueue(object : Callback<List<MemoResponse>> {
             override fun onResponse(
                 call: Call<List<MemoResponse>>,
@@ -182,9 +184,6 @@ class MylistFragment : Fragment() {
         addMemoFragment.arguments = bundle
         addMemoFragment.show(childFragmentManager, "MemoBottomSheet")
     }
-
-
-
 
 
     override fun onDestroyView() {

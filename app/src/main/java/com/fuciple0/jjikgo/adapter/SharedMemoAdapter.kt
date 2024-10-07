@@ -12,11 +12,19 @@ import com.fuciple0.jjikgo.R
 import com.fuciple0.jjikgo.data.SharedMemoData
 import com.fuciple0.jjikgo.databinding.RecyclerShareItemBinding
 
-class SharedMemoAdapter(private val sharedMemoList: List<SharedMemoData>) :
+class SharedMemoAdapter(private var sharedMemoList: MutableList<SharedMemoData>) :
     RecyclerView.Adapter<SharedMemoAdapter.MemoViewHolder>() {
 
+    // ViewHolder 클래스 정의
     inner class MemoViewHolder(val binding: RecyclerShareItemBinding) :
         RecyclerView.ViewHolder(binding.root)
+
+    // 기존 리스트에 새로운 메모 리스트를 추가하는 메서드 추가
+    fun addMemoList(newMemos: List<SharedMemoData>) {
+        val startPosition = sharedMemoList.size
+        sharedMemoList.addAll(newMemos)  // 새로운 메모 리스트 추가
+        notifyItemRangeInserted(startPosition, newMemos.size)  // 추가된 항목만 새로고침
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MemoViewHolder {
         val binding = RecyclerShareItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -28,7 +36,6 @@ class SharedMemoAdapter(private val sharedMemoList: List<SharedMemoData>) :
 
         // 로그를 추가하여 데이터를 확인
         Log.d("SharedMemoAdapter99", "Position: $position, Nickname: ${sharedMemo.nickname}, Level: ${sharedMemo.level}, MemoCount: ${sharedMemo.memoCount}, ScoreAverage: ${sharedMemo.scoreAverage}, FollowerCount: ${sharedMemo.followerCount}, LikeCount: ${sharedMemo.likeCount}")
-
 
         // 사용자 정보 바인딩
         holder.binding.tvNickname.text = sharedMemo.nickname
@@ -96,14 +103,9 @@ class SharedMemoAdapter(private val sharedMemoList: List<SharedMemoData>) :
             }
             isFollowing = !isFollowing // 상태 토글
         }
-
-
-
     }
 
     override fun getItemCount(): Int {
         return sharedMemoList.size
     }
 }
-
-

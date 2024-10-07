@@ -180,9 +180,10 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
 
         // SharedPreferences에서 emailIndex 값을 가져옴
         val sharedPreferences: SharedPreferences = requireContext().getSharedPreferences("login_prefs", Context.MODE_PRIVATE)
-        val emailIndex = sharedPreferences.getInt("email_index", -1).toString()
+        G.emailIndex = sharedPreferences.getInt("email_index", -1).toString()
+        Log.d("LocationFragment887", "onMapReady Response: $G.emailIndex")
 
-        if (emailIndex == "-1") {
+        if (G.emailIndex == "-1") {
             Toast.makeText(requireContext(), "로그인 정보가 없습니다.", Toast.LENGTH_SHORT).show()
             return
         }
@@ -487,6 +488,7 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
 
     // 카메라 위치와 줌 레벨을 기반으로 범위 내의 메모를 불러오는 메서드
     private fun loadNearbyMemos(center: LatLng, zoomLevel: Double, southwest: LatLng, northeast: LatLng) {
+
         val retrofit = RetrofitHelper.getRetrofitInstance("http://fuciple0.dothome.co.kr/")
         val retrofitService = retrofit.create(RetrofitService::class.java)
 
@@ -494,14 +496,16 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
         val call = retrofitService.getMemosInBounds(
             center.latitude, center.longitude,
             southwest.latitude, southwest.longitude,
-            northeast.latitude, northeast.longitude
+            northeast.latitude, northeast.longitude,
+            G.emailIndex!!.toInt()  // emailIndex 전달
         )
 
         call.enqueue(object : Callback<List<MemoResponse>> {
             override fun onResponse(call: Call<List<MemoResponse>>, response: Response<List<MemoResponse>>) {
                 if (response.isSuccessful) {
                     val memos = response.body()
-                    Log.d("LocationFragment777", "Number of memos retrieved: ${memos?.size ?: 0}")
+                    Log.d("LocationFragment887", "Memo Response: $memos")
+                    Log.d("LocationFragment887", "Number of memos retrieved: ${memos?.size ?: 0}")
 
                     // ViewModel에 데이터 저장 (주변 메모 리스트)
                     memoViewModel.nearbyMemoList.postValue(memos)
@@ -517,13 +521,13 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
                             addMarkerForMemo(memo)  // 개별 마커 추가
                         }
                     }
-                }else {
-                    Log.e("LocationFragment", "Failed to load memos: ${response.errorBody()?.string()}")
+                } else {
+                    Log.e("LocationFragment887", "Failed to load memos: ${response.errorBody()?.string()}")
                 }
             }
 
             override fun onFailure(call: Call<List<MemoResponse>>, t: Throwable) {
-                Log.e("LocationFragment", "Network error: ${t.message}")
+                Log.e("LocationFragment777", "Network error: ${t.message}")
             }
         })
     }

@@ -25,31 +25,10 @@
 
     </com.google.android.material.appbar.MaterialToolbar>
 
-
-<!--    <com.google.android.material.appbar.MaterialToolbar-->
-<!--        android:id="@+id/toolbar"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        app:title="내 목록보기"-->
-<!--        app:titleCentered="true"-->
-<!--        app:menu="@menu/toolbar_sort"-->
-<!--        app:navigationIcon="@drawable/ic_action_back" />-->
-
-<!--    <Spinner-->
-<!--        android:id="@+id/spinner"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:entries="@array/menu_items"-->
-<!--        android:layout_gravity="right"-->
-<!--        />-->
-
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />
-
-
 
 </LinearLayout>

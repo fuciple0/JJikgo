@@ -116,13 +116,75 @@ interface RetrofitService {
         @Query("swLat") swLat: Double,  // 남서쪽 경계의 위도
         @Query("swLng") swLng: Double,  // 남서쪽 경계의 경도
         @Query("neLat") neLat: Double,  // 북동쪽 경계의 위도
-        @Query("neLng") neLng: Double   // 북동쪽 경계의 경도
+        @Query("neLng") neLng: Double,  // 북동쪽 경계의 경도
+        @Query("email_index") emailIndex: Int  // email_index 추가
     ): Call<List<MemoResponse>>
+
 
     // 페이지 번호와 페이지 크기를 기반으로 최신 메모를 가져오는 API
     @GET("Jjikgo/getMemosSortedByDate.php")
     fun getMemosSortedByDate(
         @Query("limit") limit: Int,  // 한 번에 불러올 메모 수
-        @Query("page") page: Int     // 페이지 번호
+        @Query("page") page: Int,     // 페이지 번호
+        @Query("email_index") emailIndex: Int  // 이메일 인덱스 추가
     ): Call<List<MemoResponse>>
+
+
+
+
+
+
+    // 내 위치 기준으로 메모를 불러오는 API
+//    @GET("Jjikgo/getMemosByLocation.php")
+//    fun getMemosByLocation(
+//        @Query("latitude") latitude: Double,  // 현재 위치의 위도
+//        @Query("longitude") longitude: Double,  // 현재 위치의 경도
+//        @Query("limit") limit: Int,  // 한 번에 불러올 메모 수
+//        @Query("page") page: Int  // 페이지 번호
+//    ): Call<List<SharedMemoData>>
+
+    @GET("Jjikgo/get_shared_memo_data.php")
+    fun getMemosByLocation(
+        @Query("latitude") latitude: Double,  // 현재 위치의 위도
+        @Query("longitude") longitude: Double,  // 현재 위치의 경도
+        @Query("limit") limit: Int,
+        @Query("page") page: Int,
+        @Query("action") action: String = "Location"
+    ): Call<List<SharedMemoData>>
+
+
+
+
+
+    // 최신순으로 메모 불러오기 (기본값)
+    @GET("Jjikgo/get_shared_memo_data.php")
+    fun getMemosSortedByLatest(
+        @Query("limit") limit: Int,
+        @Query("page") page: Int,
+        @Query("action") action: String = "latest"  // 기본값은 최신순
+    ): Call<List<SharedMemoData>>
+
+
+    // 평점 높은 순서로 메모 불러오기
+    @GET("Jjikgo/get_shared_memo_data.php")
+    fun getMemosSortedByRating(
+        @Query("limit") limit: Int,
+        @Query("page") page: Int,
+        @Query("action") action: String = "rating"  // 평점순
+    ): Call<List<SharedMemoData>>
+
+    // 지도 범위 내 메모 불러오기
+    @GET("Jjikgo/get_shared_memo_data.php")
+    fun getMemosInBounds(
+        @Query("swLat") swLat: Double,
+        @Query("swLng") swLng: Double,
+        @Query("neLat") neLat: Double,
+        @Query("neLng") neLng: Double,
+        @Query("limit") limit: Int,
+        @Query("page") page: Int,
+        @Query("action") action: String = "bounds"  // 범위 내 메모 불러오기
+    ): Call<List<SharedMemoData>>
+
+
+
 }

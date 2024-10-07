@@ -11,6 +11,8 @@ data class SharedMemoData(
     val memoImage: String?,
     val memoDate: String,
     val userProfile: String?,  // 사용자 프로필 이미지
-    val addrMemo: String  // 주소 데이터 추가
+    val addrMemo: String,      // 주소 데이터 추가
+    val latitude: Double,      // 위도 추가
+    val longitude: Double      // 경도 추가
 )
 
