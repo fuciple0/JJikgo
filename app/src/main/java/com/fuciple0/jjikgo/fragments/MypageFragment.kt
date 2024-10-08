@@ -1,5 +1,6 @@
 package com.fuciple0.jjikgo.fragments
 
+import android.animation.ObjectAnimator
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -29,6 +30,9 @@ class MypageFragment : Fragment() {
 
     private lateinit var binding: FragmentMypageBinding
     private var currentEmailIndex: Int? = null
+
+
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -61,6 +65,11 @@ class MypageFragment : Fragment() {
                 false
             }
         }
+
+
+
+
+
 
         return binding.root
     }

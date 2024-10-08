@@ -78,4 +78,6 @@ dependencies {
 
     implementation("androidx.fragment:fragment-ktx:1.3.6")
 
+    implementation("com.github.MackHartley:RoundedProgressBar:3.0.0")
+
 }
