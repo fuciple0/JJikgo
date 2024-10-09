@@ -9,6 +9,7 @@ import com.fuciple0.jjikgo.data.SharedMemoData
 import com.fuciple0.jjikgo.data.UserResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.DELETE
 import retrofit2.http.Field
@@ -121,6 +122,11 @@ interface RetrofitService {
     ): Call<List<MemoResponse>>
 
 
+
+
+
+
+
     // 페이지 번호와 페이지 크기를 기반으로 최신 메모를 가져오는 API
     @GET("Jjikgo/getMemosSortedByDate.php")
     fun getMemosSortedByDate(
@@ -143,26 +149,49 @@ interface RetrofitService {
 //        @Query("page") page: Int  // 페이지 번호
 //    ): Call<List<SharedMemoData>>
 
+
+
+
+
+
+
+    // PHP 파일에 GET 요청으로 데이터 보내기
+    @GET("Jjikgo/test_99.php")
+    fun sendData(
+        @Query("var1") var1: String,
+        @Query("var2") var2: String,
+        @Query("var3") var3: String
+    ): Call<ResponseBody>
+
+
+
+
+
+
+
+
     @GET("Jjikgo/get_shared_memo_data.php")
     fun getMemosByLocation(
         @Query("latitude") latitude: Double,  // 현재 위치의 위도
         @Query("longitude") longitude: Double,  // 현재 위치의 경도
         @Query("limit") limit: Int,
         @Query("page") page: Int,
+        @Query("loggedInEmailIndex") loggedInEmailIndex: Int,  // 로그인한 사용자 email_index 추가
         @Query("action") action: String = "Location"
     ): Call<List<SharedMemoData>>
 
 
 
 
-
-    // 최신순으로 메모 불러오기 (기본값)
-    @GET("Jjikgo/get_shared_memo_data.php")
+    // 최신순으로 공유메모 불러오기
+    @GET("Jjikgo/getMemos_Sorted_Latest.php")
     fun getMemosSortedByLatest(
-        @Query("limit") limit: Int,
-        @Query("page") page: Int,
-        @Query("action") action: String = "latest"  // 기본값은 최신순
+//        @Query("limit") limit: Int,
+//        @Query("page") page: Int,
+        @Query("loggedInEmailIndex") loggedInEmailIndex: Int
     ): Call<List<SharedMemoData>>
+
+
 
 
     // 평점 높은 순서로 메모 불러오기
@@ -170,6 +199,7 @@ interface RetrofitService {
     fun getMemosSortedByRating(
         @Query("limit") limit: Int,
         @Query("page") page: Int,
+        @Query("loggedInEmailIndex") loggedInEmailIndex: Int,  // 로그인한 사용자 email_index 추가
         @Query("action") action: String = "rating"  // 평점순
     ): Call<List<SharedMemoData>>
 
@@ -182,9 +212,58 @@ interface RetrofitService {
         @Query("neLng") neLng: Double,
         @Query("limit") limit: Int,
         @Query("page") page: Int,
+        @Query("loggedInEmailIndex") loggedInEmailIndex: Int,  // 로그인한 사용자 email_index 추가
         @Query("action") action: String = "bounds"  // 범위 내 메모 불러오기
     ): Call<List<SharedMemoData>>
 
 
 
+
+
+    // 북마크 상태 업데이트 API
+    @FormUrlEncoded
+    @POST("Jjikgo/updateBookmarkStatus.php")  // .php 추가
+    fun updateBookmarkStatus(
+        @Field("id_memo") idMemo: Int,
+        @Field("email_index") emailIndex: Int,
+        @Field("is_bookmarked") isBookmarked: Boolean
+    ): Call<Void>
+
+    // 좋아요 상태 업데이트 API
+    @FormUrlEncoded
+    @POST("Jjikgo/updateLikeStatus.php")  // .php 추가
+    fun updateLikeStatus(
+        @Field("id_memo") idMemo: Int,
+        @Field("email_index") emailIndex: Int,
+        @Field("is_liked") isLiked: Boolean
+    ): Call<Void>
+
+    // 팔로우 상태 업데이트 API
+    @FormUrlEncoded
+    @POST("Jjikgo/updateFollowStatus.php")  // .php 추가
+    fun updateFollowStatus(
+        @Field("email_index") emailIndex: Int,
+        @Field("target_email_index") targetEmailIndex: Int,
+        @Field("is_following") isFollowing: Boolean
+    ): Call<Void>
+
+
+
+
+
+
+
+//    @FormUrlEncoded
+//    @POST("Jjikgo/get999.php")
+//    fun getAllMemosForUser(
+//        @Field("email_index") emailIndex: Int
+//    ): Call<List<SharedMemoData>>
+
+
+
+    @FormUrlEncoded
+    @POST("Jjikgo/get999.php")
+    fun getAllMemosForUser999(
+        @Field("email_index") emailIndex: Int
+    ): Call<String>  // 원시 문자열로 받기 위해 String 타입으로 변경
 }

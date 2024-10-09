@@ -14,9 +14,13 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.fuciple0.jjikgo.R
 import com.fuciple0.jjikgo.activities.LoginActivity
+import com.fuciple0.jjikgo.adapter.SharedMemoAdapter
+import com.fuciple0.jjikgo.data.ToggleViewModel
 import com.fuciple0.jjikgo.data.UserResponse
 import com.fuciple0.jjikgo.databinding.FragmentMypageBinding
 import com.fuciple0.jjikgo.network.RetrofitHelper
@@ -31,8 +35,7 @@ class MypageFragment : Fragment() {
     private lateinit var binding: FragmentMypageBinding
     private var currentEmailIndex: Int? = null
 
-
-
+    private lateinit var toggleViewModel: ToggleViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,6 +43,11 @@ class MypageFragment : Fragment() {
     ): View? {
         // 뷰 바인딩 설정
         binding = FragmentMypageBinding.inflate(inflater, container, false)
+        // ViewModel 초기화 (북마크된 항목을 가져오기 위해 사용)
+        toggleViewModel = ViewModelProvider(requireActivity()).get(ToggleViewModel::class.java)
+        // RecyclerView 설정
+        setupRecyclerView()
+
 
         // SharedPreferences에서 email_index 값을 가져옴
         currentEmailIndex = getCurrentEmailIndex()
@@ -65,13 +73,22 @@ class MypageFragment : Fragment() {
                 false
             }
         }
-
-
-
-
-
-
         return binding.root
+    }
+
+    private fun setupRecyclerView() {
+        // 북마크된 항목 가져오기
+        val bookmarkedMemos = toggleViewModel.getBookmarkedMemos()
+
+        // RecyclerView에 어댑터 설정
+        val sharedMemoAdapter = SharedMemoAdapter(bookmarkedMemos.toMutableList(), toggleViewModel)
+        binding.recyclerView.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = sharedMemoAdapter
+        }
+
+        // 로그로 확인 (디버깅용)
+        Log.d("MypageFragment", "북마크된 메모 수: ${bookmarkedMemos.size}")
     }
 
 

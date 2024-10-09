@@ -12,6 +12,7 @@ class ScoreManager(private val emailIndex: Int) {
             "like" -> 1  // 좋아요
             "follow" -> 3  // 팔로우
             "followed" -> 3  // 팔로잉
+            "bookmark" -> 1 // 북마크
             else -> 0  // 기본값
         }
 

@@ -220,6 +220,7 @@
             android:background="@drawable/bg_box_gray"
             >
             <TextView
+                android:id="@+id/tv_thumup"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_marginStart="12dp"
@@ -239,13 +240,7 @@
         </LinearLayout>
 
         </LinearLayout>
+
     </FrameLayout>
-
-
-
-
-
-
-
 
 </RelativeLayout>
