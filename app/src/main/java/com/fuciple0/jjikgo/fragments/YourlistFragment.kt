@@ -80,7 +80,7 @@ class YourlistFragment : Fragment() {
         setupRecyclerViewScrollListener()
 
         //테스트 메소드
-        test()
+        //test()
 
         // 초기 실행 메소드 : 내 주변 검색
         //loadMemosByLocation()
@@ -105,40 +105,40 @@ class YourlistFragment : Fragment() {
         return view
     }
 
-    private fun test() {
-        val emailIndex = G.emailIndex!!.toInt()  // G 클래스의 emailIndex를 가져온다고 가정
-
-        // RetrofitHelper를 사용하여 Retrofit 인스턴스 생성
-        val retrofit = RetrofitHelper.getRetrofitInstance("http://fuciple0.dothome.co.kr/")
-        val retrofitService = retrofit.create(RetrofitService::class.java)
-
-        // API 호출
-        val call = retrofitService.getAllMemosForUser999(emailIndex)
-        call.enqueue(object : Callback<String> {  // 응답을 String 타입으로 받음
-            override fun onResponse(call: Call<String>, response: Response<String>) {
-                if (response.isSuccessful) {
-                    // 원시 JSON 문자열 그대로 출력
-                    val rawJson = response.body()
-                    rawJson?.let {
-                        // 긴 로그를 나누어서 출력하는 부분
-                        val maxLogSize = 1500  // 한 번에 출력할 최대 길이
-                        for (i in 0..it.length / maxLogSize) {
-                            val start = i * maxLogSize
-                            val end = if (start + maxLogSize > it.length) it.length else start + maxLogSize
-                            Log.d("MemoListTest889", it.substring(start, end))
-                        }
-                    }
-                    // RecyclerView나 지도에 데이터를 반영하는 메소드 호출
-                    // updateRecyclerView(memoList)
-                } else {
-                    Log.e("TestFragment", "Failed to load memos: ${response.errorBody()?.string()}")
-                }
-            }
-            override fun onFailure(call: Call<String>, t: Throwable) {
-                Log.e("TestFragment", "Network error: ${t.message}")
-            }
-        })
-    }
+//    private fun test() {
+//        val emailIndex = G.emailIndex!!.toInt()  // G 클래스의 emailIndex를 가져온다고 가정
+//
+//        // RetrofitHelper를 사용하여 Retrofit 인스턴스 생성
+//        val retrofit = RetrofitHelper.getRetrofitInstance("http://fuciple0.dothome.co.kr/")
+//        val retrofitService = retrofit.create(RetrofitService::class.java)
+//
+//        // API 호출
+//        val call = retrofitService.getAllMemosForUser999(emailIndex)
+//        call.enqueue(object : Callback<String> {  // 응답을 String 타입으로 받음
+//            override fun onResponse(call: Call<String>, response: Response<String>) {
+//                if (response.isSuccessful) {
+//                    // 원시 JSON 문자열 그대로 출력
+//                    val rawJson = response.body()
+//                    rawJson?.let {
+//                        // 긴 로그를 나누어서 출력하는 부분
+//                        val maxLogSize = 1500  // 한 번에 출력할 최대 길이
+//                        for (i in 0..it.length / maxLogSize) {
+//                            val start = i * maxLogSize
+//                            val end = if (start + maxLogSize > it.length) it.length else start + maxLogSize
+//                            Log.d("MemoListTest889", it.substring(start, end))
+//                        }
+//                    }
+//                    // RecyclerView나 지도에 데이터를 반영하는 메소드 호출
+//                    // updateRecyclerView(memoList)
+//                } else {
+//                    Log.e("TestFragment", "Failed to load memos: ${response.errorBody()?.string()}")
+//                }
+//            }
+//            override fun onFailure(call: Call<String>, t: Throwable) {
+//                Log.e("TestFragment", "Network error: ${t.message}")
+//            }
+//        })
+//    }
 
 
     // RecyclerView 스크롤 리스너 설정 함수

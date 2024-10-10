@@ -260,10 +260,10 @@ interface RetrofitService {
 //    ): Call<List<SharedMemoData>>
 
 
-
+//테스트 쿼리
     @FormUrlEncoded
-    @POST("Jjikgo/get999.php")
-    fun getAllMemosForUser999(
+    @POST("Jjikgo/get998.php")
+    fun get998(
         @Field("email_index") emailIndex: Int
     ): Call<String>  // 원시 문자열로 받기 위해 String 타입으로 변경
 }

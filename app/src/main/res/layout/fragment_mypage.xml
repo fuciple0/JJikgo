@@ -64,7 +64,7 @@
                         android:id="@+id/user_nick"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="홍길동"
+                        android:text=" "
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
@@ -118,7 +118,7 @@
                     android:id="@+id/tv_point_score"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="누적 117점"
+                    android:text="누적  점"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:layout_marginLeft="180dp"/>
