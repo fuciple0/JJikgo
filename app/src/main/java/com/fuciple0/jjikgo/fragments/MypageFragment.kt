@@ -117,11 +117,24 @@ class MypageFragment : Fragment() {
 
                             // 누적 점수 설정 (id = tv_point_score)
                             binding.tvPointScore.text = "누적 ${it.total_score ?: 0}점"
+
+                            // 점수 상세 내역 설정 (id = tv_point_detail)
+                            val scoreDetailText = StringBuilder()
+
+                            // score_details가 null 또는 비어있지 않은지 확인
+                            if (!it.score_details.isNullOrEmpty()) {
+                                it.score_details.forEach { detail ->
+                                    scoreDetailText.append("${detail.date_score}   ${detail.tag_score}   ${detail.num_score}점\n")
+                                }
+                            } else {
+                                scoreDetailText.append("점수 내역 없음")
+                            }
+                            binding.tvPointDetail.text = scoreDetailText.toString().trimEnd()  // 마지막 줄바꿈 제거
                         } else {
                             Log.e("UserInfo", "Error: ${it.status}")
                         }
                     }
-                } else {
+                 } else {
                     Log.e("UserInfo", "Response error: ${response.errorBody()?.string()}")
                 }
             }
