@@ -6,6 +6,7 @@ import com.fuciple0.jjikgo.data.MemoResponse
 import com.fuciple0.jjikgo.data.NaverUserInfoResponse
 import com.fuciple0.jjikgo.data.RegisterResponse
 import com.fuciple0.jjikgo.data.SharedMemoData
+import com.fuciple0.jjikgo.data.UserInfoResponse
 import com.fuciple0.jjikgo.data.UserResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -66,9 +67,6 @@ interface RetrofitService {
         @Field("pw_user") password: String
     ): Call<LoginResponse>
 
-
-    @GET("Jjikgo/getUserInfo.php")
-    fun getUserInfo(@Query("emailIndex") userId: Int): Call<UserResponse>
 
 
     // 회원가입 API 호출 (문자열과 이미지 파일을 함께 전송)
@@ -261,9 +259,26 @@ interface RetrofitService {
 
 
 //테스트 쿼리
+//    @FormUrlEncoded
+//    @POST("Jjikgo/get998.php")
+//    fun get998(
+//        @Field("email_index") emailIndex: Int
+//    ): Call<String>  // 원시 문자열로 받기 위해 String 타입으로 변경
+//
+
     @FormUrlEncoded
-    @POST("Jjikgo/get998.php")
+    @POST("Jjikgo/getUserInfo.php")
     fun get998(
         @Field("email_index") emailIndex: Int
     ): Call<String>  // 원시 문자열로 받기 위해 String 타입으로 변경
+
+
+
+    @FormUrlEncoded
+    @POST("Jjikgo/getUserInfo.php")
+    fun getUserInfo(@Field("email_index") emailIndex: Int): Call<UserInfoResponse>
+
+
+
+
 }
