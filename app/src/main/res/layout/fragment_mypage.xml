@@ -102,7 +102,7 @@
                 android:elevation="4dp">
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
@@ -112,7 +112,9 @@
                     android:layout_height="wrap_content"
                     android:text="적립완료 1점"
                     android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:layout_weight="1"
+                    />
 
                 <TextView
                     android:id="@+id/tv_point_score"
@@ -121,6 +123,7 @@
                     android:text="누적  점"
                     android:textSize="16sp"
                     android:textStyle="bold"
+                    android:textColor="@color/pointcolor"
                     android:layout_marginLeft="180dp"/>
 
                 </LinearLayout>
@@ -210,7 +213,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:background="#FFFFFF"
-                android:padding="16dp"
+                android:paddingTop="8dp"
                 android:layout_marginTop="8dp"
                 android:elevation="4dp">
 
@@ -238,7 +241,7 @@
                     android:id="@+id/recycler_view"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                     />
 
 

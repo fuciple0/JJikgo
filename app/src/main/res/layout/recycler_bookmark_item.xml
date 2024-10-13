@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="195dp"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/white"
+    android:layout_margin="8dp">
+
+
+    <LinearLayout
+        android:id="@+id/sec1"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="8dp">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/user_profile"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:src="@drawable/dummy_2"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginRight="4dp"
+        app:civ_border_width="1dp"
+        app:civ_border_color="#E4E4E4"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        >
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginStart="5dp"
+
+            android:gravity="center_vertical"
+            >
+            <TextView
+                android:id="@+id/tv_nickname"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Gina"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="@color/black"
+                />
+            <TextView
+                android:id="@+id/tv_level"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="4dp"
+                android:text="레벨 : 1"
+                android:textColor="#2B5CBF" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/sec2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_below="@+id/sec1"
+            >
+
+            <TextView
+                android:layout_width="14dp"
+                android:layout_height="14dp"
+                android:layout_alignParentStart="true"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/baseline_star_24"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tv_rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="5"
+                android:textColor="#FF0000"
+                />
+
+            <TextView
+                android:id="@+id/tv_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:text="2024-08-09"
+                android:textColor="#898989"
+                />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+    </LinearLayout>
+
+
+
+    <TextView
+        android:id="@+id/tv_addr"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/sec1"
+        android:paddingTop="4dp"
+        android:paddingRight="8dp"
+        android:paddingLeft="8dp"
+        android:textStyle="bold"
+        android:text="서울 성동구 성수동 1가 14-76 " />
+
+
+    <TextView
+        android:id="@+id/tv_body"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_addr"
+        android:paddingTop="4dp"
+        android:paddingRight="8dp"
+        android:paddingLeft="8dp"
+        android:text="고기가sdfasdfasdf음밥도 맛있다. 고기가 맛있다. 정ddadfasdfasdf말 맛있다. 복음밥도 맛있다.고기가 맛있다. 정말 맛있다. 복음밥도 맛있다 " />
+
+    <FrameLayout
+        android:id="@+id/sec4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tv_body">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/iv"
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            android:scaleType="centerCrop"
+            android:layout_marginTop="12dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginBottom="8dp"
+            android:adjustViewBounds="true"
+            app:shapeAppearanceOverlay="@style/Circle"
+            app:srcCompat="@drawable/dummy_3" />
+
+        <ImageView
+            android:id="@+id/bookmarkIcon"
+            android:layout_width="35dp"
+            android:layout_height="40dp"
+            android:layout_gravity="end|bottom|left"
+            android:layout_marginLeft="12dp"
+            android:layout_marginBottom="8dp"
+            android:src="@drawable/ic_bookmark_border"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_gravity="bottom|right"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp"
+            android:layout_marginRight="16dp"
+            >
+
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+</RelativeLayout>

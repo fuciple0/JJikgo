@@ -24,6 +24,16 @@ class ToggleViewModel : ViewModel() {
     // 이미 북마크된 메모들 (UI에서 사용, 초기화되지 않음)
     private val bookmarkedMemos = mutableListOf<SharedMemoData>()
 
+    // 추가된 부분: addBookmarkedMemos 메서드
+    // 서버에서 가져온 북마크된 메모를 추가하는 메서드
+    fun addBookmarkedMemos(newMemos: List<SharedMemoData>) {
+        // 현재 북마크된 메모 목록을 가져와 새로운 메모 추가
+        val updatedMemos = bookmarkedMemos.toMutableList()
+        updatedMemos.addAll(newMemos)
+        bookmarkedMemos.clear()
+        bookmarkedMemos.addAll(updatedMemos)
+    }
+
 
     // 구조적으로 수정해야함 ***
 

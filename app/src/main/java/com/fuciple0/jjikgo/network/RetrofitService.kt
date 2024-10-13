@@ -280,5 +280,22 @@ interface RetrofitService {
 
 
 
+    @POST("Jjikgo/updateUserLevel.php")
+    @FormUrlEncoded
+    fun updateUserLevel(
+        @Field("email_index") emailIndex: Int,
+        @Field("level_user") newLevel: Int
+    ): Call<Void>
+
+    @GET("Jjikgo/getBookmarkedMemos.php")
+    fun getBookmarkedMemos(@Query("email_index") emailIndex: Int): Call<List<SharedMemoData>>
+
+
+    @Multipart
+    @POST("Jjikgo/updateProfile.php")
+    fun updateProfile(
+        @PartMap data: Map<String, String>,
+        @Part profileImage: MultipartBody.Part?
+    ): Call<String>
 
 }

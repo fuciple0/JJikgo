@@ -34,10 +34,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-
-
 class AddmemoFragment : BottomSheetDialogFragment() {
-
 
     // ViewBinding 객체 선언
     private var _binding: FragmentAddmemoBottomsheetBinding? = null
@@ -46,7 +43,6 @@ class AddmemoFragment : BottomSheetDialogFragment() {
     // 멤버변수 - 업로드할 이미지의 절대 주소를 저장하는 문자열 참조변수
     var imgPath: String? = null
 
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -54,7 +50,6 @@ class AddmemoFragment : BottomSheetDialogFragment() {
         _binding = FragmentAddmemoBottomsheetBinding.inflate(inflater, container, false)
         return binding.root
     }
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
