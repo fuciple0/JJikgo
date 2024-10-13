@@ -4,8 +4,8 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
     <string-array name="menu_items">
-        <item>내 주변</item>
         <item>최신순</item>
+        <item>내주변</item>
     </string-array>
 
     <string-array name="share_items">

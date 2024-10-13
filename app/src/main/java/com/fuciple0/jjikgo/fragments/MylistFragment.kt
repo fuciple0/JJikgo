@@ -73,11 +73,11 @@ class MylistFragment : Fragment() {
                 id: Long
             ) {
                 when (position) {
-                    0 -> observeNearbyMemos()  // "내 주변" 선택 시
-                    1 -> {
+                    0 -> {
                         currentPage = 1 // 페이지 초기화
                         loadMemosSortedByDate(currentPage) // "최신순" 선택 시, 첫 페이지 로드
                     } // "최신순" 선택 시
+                    1 -> observeNearbyMemos()  // "내 주변" 선택 시
                 }
             }
 
