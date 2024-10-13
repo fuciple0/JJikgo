@@ -23,8 +23,10 @@ import com.fuciple0.jjikgo.R
 import com.fuciple0.jjikgo.activities.LoginActivity
 import com.fuciple0.jjikgo.adapter.BookmarkedMemoAdapter
 import com.fuciple0.jjikgo.adapter.SharedMemoAdapter
+import com.fuciple0.jjikgo.data.FollowResponse
 import com.fuciple0.jjikgo.data.SharedMemoData
 import com.fuciple0.jjikgo.data.ToggleViewModel
+import com.fuciple0.jjikgo.data.UserData
 import com.fuciple0.jjikgo.data.UserInfoResponse
 import com.fuciple0.jjikgo.data.UserResponse
 import com.fuciple0.jjikgo.databinding.FragmentMypageBinding
@@ -83,8 +85,89 @@ class MypageFragment : Fragment() {
         //test(G.emailIndex!!.toInt())
         fetchUserInfo(G.emailIndex!!.toInt())
 
+        // 팔로우 추가 버튼 클릭 리스너 설정
+        binding.tvSearchFollow.setOnClickListener {
+            val email = binding.searchEditText.text.toString().trim()
+            if (email.isNotEmpty()) {
+                addsearch(email) // 팔로우 추가 요청
+            } else {
+                Toast.makeText(requireContext(), "이메일을 입력하세요.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
         return binding.root
     }
+
+    private fun addsearch(email: String) {
+        // Retrofit 요청
+        val retrofitService = RetrofitHelper.getRetrofitInstance("http://fuciple0.dothome.co.kr/")
+            .create(RetrofitService::class.java)
+
+
+        // Retrofit 요청 실행
+        retrofitService.searchUserByEmail(email).enqueue(object : Callback<FollowResponse> {
+            override fun onResponse(call: Call<FollowResponse>, response: Response<FollowResponse>) {
+                if (response.isSuccessful) {
+                    val followResponse = response.body()
+                    if (followResponse?.status == "success" && followResponse.userData != null) {
+                        // 검색 결과 성공적으로 받음
+                        showSearchResultDialog(followResponse.userData)
+                    } else {
+                        // 이메일이 존재하지 않음
+                        Toast.makeText(requireContext(), "해당 이메일을 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    // 요청 실패 처리
+                    Toast.makeText(requireContext(), "요청에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<FollowResponse>, t: Throwable) {
+                // 네트워크 오류 처리
+                Toast.makeText(requireContext(), "네트워크 오류: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun showSearchResultDialog(userData: UserData) {
+        // AlertDialog로 검색된 사용자 정보 표시
+        AlertDialog.Builder(requireContext())
+            .setTitle("사용자 검색 결과")
+            .setMessage("닉네임: ${userData.nickname}\n이메일: ${userData.email}")
+            .setPositiveButton("팔로우") { dialog, _ ->
+                followUser(userData.emailIndex, userData.email)  // 사용자의 email과 emailIndex를 전달
+                dialog.dismiss()
+            }
+            .setNegativeButton("취소") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun followUser(targetEmailIndex: Int, email: String) {
+        // Retrofit 요청으로 팔로우 처리
+        val retrofitService = RetrofitHelper.getRetrofitInstance("http://fuciple0.dothome.co.kr/")
+            .create(RetrofitService::class.java)
+
+        retrofitService.addFollow(targetEmailIndex, G.emailIndex!!.toInt()).enqueue(object : Callback<FollowResponse> {
+            override fun onResponse(call: Call<FollowResponse>, response: Response<FollowResponse>) {
+                if (response.isSuccessful) {
+                    // 성공적으로 팔로우된 경우 이메일 주소 표시
+                    Toast.makeText(requireContext(), "$email 님을 팔로우 하였습니다.", Toast.LENGTH_SHORT).show()
+                    // 검색창 클리어
+                    binding.searchEditText.text?.clear()
+                } else {
+                    Toast.makeText(requireContext(), "팔로우 요청에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<FollowResponse>, t: Throwable) {
+                Toast.makeText(requireContext(), "네트워크 오류: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+
 
     private fun showEditUserProfileBottomSheet() {
         // 현재 프로필 이미지와 닉네임을 전달
@@ -166,7 +249,6 @@ class MypageFragment : Fragment() {
 
                             // 다음 레벨까지의 점수 계산
                             val pointsForNextLevel = pointsForLevel(currentLevel + 1)
-                            val pointsForCurrentLevel = pointsForLevel(currentLevel)
 
                             // progressToNextLevel 값을 Double로 변환
                             val progressToNextLevel = ((remainingScore).toDouble() / (pointsForNextLevel).toDouble()) * 100

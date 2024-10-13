@@ -1,5 +1,6 @@
 package com.fuciple0.jjikgo.network
 
+import com.fuciple0.jjikgo.data.FollowResponse
 import com.fuciple0.jjikgo.data.KakoSearchPlaceResponse
 import com.fuciple0.jjikgo.data.LoginResponse
 import com.fuciple0.jjikgo.data.MemoResponse
@@ -298,4 +299,20 @@ interface RetrofitService {
         @Part profileImage: MultipartBody.Part?
     ): Call<String>
 
+
+
+    // 이메일로 사용자 검색
+    @FormUrlEncoded
+    @POST("Jjikgo/search_user_by_email.php")
+    fun searchUserByEmail(
+        @Field("email") email: String
+    ): Call<FollowResponse>
+
+    // 팔로우 추가
+    @FormUrlEncoded
+    @POST("Jjikgo/add_follow_toMypage.php")
+    fun addFollow(
+        @Field("target_email_index") targetEmailIndex: Int,  // 팔로우할 대상의 email_index
+        @Field("email_index") emailIndex: Int  // 현재 사용자의 email_index
+    ): Call<FollowResponse>
 }
