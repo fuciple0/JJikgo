@@ -218,10 +218,10 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
             val zoomLevel = naverMap.cameraPosition.zoom
 
             if (shouldUpdateMarkers(cameraPosition)) {
-                if (zoomLevel <= 12) {
-                    enableClustering()  // 줌 레벨이 12 이하이면 클러스터링 활성화
+                if (zoomLevel <= 11) {
+                    enableClustering()  // 줌 레벨이 11 이하이면 클러스터링 활성화
                 } else {
-                    disableClustering()  // 줌 레벨이 13 이상이면 개별 마커 표시
+                    disableClustering()  // 줌 레벨이 12 이상이면 개별 마커 표시
                 }
                 updateMarkersBasedOnCameraPosition()
                 lastCameraPosition = cameraPosition  // 현재 카메라 위치 저장
