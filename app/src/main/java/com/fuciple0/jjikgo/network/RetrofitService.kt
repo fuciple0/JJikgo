@@ -185,8 +185,8 @@ interface RetrofitService {
     // 최신순으로 공유메모 불러오기
     @GET("Jjikgo/getMemos_Sorted_Latest.php")
     fun getMemosSortedByLatest(
-//        @Query("limit") limit: Int,
-//        @Query("page") page: Int,
+        @Query("limit") limit: Int,
+        @Query("page") page: Int,
         @Query("loggedInEmailIndex") loggedInEmailIndex: Int
     ): Call<List<SharedMemoData>>
 

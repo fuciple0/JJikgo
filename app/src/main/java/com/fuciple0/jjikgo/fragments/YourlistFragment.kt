@@ -60,8 +60,10 @@ class YourlistFragment : Fragment() {
 
     private lateinit var toggleViewModel: ToggleViewModel
 
+    var isFirstSelection = true  // 기본 선택 여부를 추적하는 변수
+
     // 정렬 방식에 따른 메서드 호출을 결정하는 변수
-    private var currentSortOption = 0 // 0: 위치 기준, 1: 최신순, 2: 평점 높은 순
+    private var currentSortOption = 0 // 0: 최신순, 1: 내주변, 2: 팔로우
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -318,6 +320,10 @@ class YourlistFragment : Fragment() {
                 position: Int,
                 id: Long
             ) {
+                if (isFirstSelection) {
+                    isFirstSelection = false  // 첫 선택이 끝났으니 플래그를 변경
+                    return  // 기본 선택 동작 시에는 메서드를 호출하지 않음
+                }
                 when (position) {
                     0 -> {
                         currentPage = 1
@@ -389,19 +395,18 @@ class YourlistFragment : Fragment() {
         val retrofit = RetrofitHelper.getRetrofitInstance("http://fuciple0.dothome.co.kr/")
         val retrofitService = retrofit.create(RetrofitService::class.java)
 
-        //val call = retrofitService.getMemosSortedByLatest(pageSize, page, G.emailIndex!!.toInt())
-        val call = retrofitService.getMemosSortedByLatest(G.emailIndex!!.toInt())
+        val call = retrofitService.getMemosSortedByLatest(pageSize, page, G.emailIndex!!.toInt())
         call.enqueue(object : Callback<List<SharedMemoData>> {
             override fun onResponse(call: Call<List<SharedMemoData>>, response: Response<List<SharedMemoData>>) {
                 if (response.isSuccessful) {
                     memoList = response.body() ?: emptyList()  // memoList 업데이트
                     memoList.let {
-                        Log.d("YourlistFragment997", "Latest_총 가져온 메모 수: ${memoList.size}")
+                        Log.d("YourlistFragment987", "Latest_총 가져온 메모 수: ${memoList.size}")
 
                         // 각각의 게시물의 isBookmarked, isFollowing, isLiked 값을 로그로 출력
-                        memoList.forEach { memo ->
-                            Log.d("YourlistFragment997", "Memo ID: ${memo.id_memo}, isBookmarked: ${memo.isBookmarked}, isFollowing: ${memo.isFollowing}, isLiked: ${memo.isLiked}")
-                        }
+                        // memoList.forEach { memo ->
+                        // Log.d("YourlistFragment997", "Memo ID: ${memo.id_memo}, isBookmarked: ${memo.isBookmarked}, isFollowing: ${memo.isFollowing}, isLiked: ${memo.isLiked}")
+                        // }
                         updateRecyclerView(it)
                         if (isMapVisible) {
                             updateMarkers(it)  // 지도 상태일 때 마커 업데이트
