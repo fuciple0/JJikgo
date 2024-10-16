@@ -169,14 +169,15 @@ interface RetrofitService {
 
 
 
-    @GET("Jjikgo/get_shared_memo_data.php")
+    // 내 주변 공유메모 불러오기 위한 Retrofit API 정의
+    @GET("Jjikgo/getMemos_By_Location.php")
     fun getMemosByLocation(
-        @Query("latitude") latitude: Double,  // 현재 위치의 위도
-        @Query("longitude") longitude: Double,  // 현재 위치의 경도
         @Query("limit") limit: Int,
         @Query("page") page: Int,
-        @Query("loggedInEmailIndex") loggedInEmailIndex: Int,  // 로그인한 사용자 email_index 추가
-        @Query("action") action: String = "Location"
+        @Query("x") x: Double,
+        @Query("y") y: Double,
+        @Query("radius") radius: Int,
+        @Query("loggedInEmailIndex") loggedInEmailIndex: Int
     ): Call<List<SharedMemoData>>
 
 

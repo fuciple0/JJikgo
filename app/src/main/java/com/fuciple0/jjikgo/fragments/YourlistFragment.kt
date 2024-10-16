@@ -31,6 +31,7 @@ import com.fuciple0.jjikgo.databinding.FragmentYourlistBinding
 import com.fuciple0.jjikgo.network.RetrofitHelper
 import com.fuciple0.jjikgo.network.RetrofitService
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.gson.Gson
 import com.naver.maps.geometry.LatLng
 import com.naver.maps.map.CameraAnimation
 import com.naver.maps.map.CameraUpdate
@@ -39,9 +40,12 @@ import com.naver.maps.map.NaverMap
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.overlay.OverlayImage
 import com.naver.maps.map.util.MarkerIcons
+import okhttp3.ResponseBody
+import org.json.JSONArray
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import com.google.gson.reflect.TypeToken
 
 class YourlistFragment : Fragment() {
 
@@ -85,7 +89,7 @@ class YourlistFragment : Fragment() {
         //test()
 
         // 초기 실행 메소드 : 내 주변 검색
-        //loadMemosByLocation()
+
         loadMemosSortedByDate(currentPage)
 
         // 스피너 설정
@@ -283,21 +287,11 @@ class YourlistFragment : Fragment() {
             binding.showMapFab.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
         }
     }
-
     // RecyclerView 설정 함수
     private fun setupRecyclerView() {
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
-
-        // 샘플 메모 데이터 리스트
-        val sharedMemoList = mutableListOf<SharedMemoData>(
-            // 여기에 데이터를 추가하세요
-        )
-        // 어댑터 초기화 시 toggleViewModel을 전달
-        val sharedMemoAdapter = SharedMemoAdapter(sharedMemoList, toggleViewModel)
-        binding.recyclerView.apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = sharedMemoAdapter
-        }
+        sharedMemoAdapter = SharedMemoAdapter(mutableListOf(), toggleViewModel)
+        binding.recyclerView.adapter = sharedMemoAdapter
     }
 
 
@@ -324,21 +318,11 @@ class YourlistFragment : Fragment() {
                     isFirstSelection = false  // 첫 선택이 끝났으니 플래그를 변경
                     return  // 기본 선택 동작 시에는 메서드를 호출하지 않음
                 }
+                currentPage = 1  // 페이지를 초기화
                 when (position) {
-                    0 -> {
-                        currentPage = 1
-                        //loadMemosByLocation()
-                        loadMemosSortedByDate(currentPage)
-                    }
-                    1 -> {
-                        currentPage = 1
-                        loadMemosSortedByDate(currentPage)
-                    }
-                    2 -> {
-                        currentPage = 1
-                        //loadMemosByRating(currentPage)
-                        loadMemosSortedByDate(currentPage)
-                    }
+                    0 -> loadMemosSortedByDate(currentPage)
+                    1 -> loadMemosByLocation(G.mylocation?.latitude!!.toDouble(), G.mylocation?.longitude!!.toDouble(), currentPage)
+                    2 -> loadMemosSortedByDate(currentPage)
                 }
             }
             override fun onNothingSelected(parent: AdapterView<*>) {
@@ -350,38 +334,42 @@ class YourlistFragment : Fragment() {
 
 
 
-    // 서버에서 내 주변 기준으로 데이터를 불러오는 메서드
-    private fun loadMemosByLocation() {
-        if (isLoading) return
-        isLoading = true
-
+    // 내 주변 메모를 불러오는 메서드
+    fun loadMemosByLocation(x: Double, y: Double, page: Int) {
         val retrofit = RetrofitHelper.getRetrofitInstance("http://fuciple0.dothome.co.kr/")
         val retrofitService = retrofit.create(RetrofitService::class.java)
 
-        val latitude = G.mylocation?.latitude ?: 0.0
-        val longitude = G.mylocation?.longitude ?: 0.0
-
-        val call = retrofitService.getMemosByLocation(latitude, longitude, pageSize, currentPage, 16)
-        call.enqueue(object : Callback<List<SharedMemoData>> {  // 타입을 SharedMemoData로 변경
+        val call = retrofitService.getMemosByLocation(
+            limit = 10,
+            page = page,
+            x = x,
+            y = y,
+            radius = 10000,  // 반경 10km
+            loggedInEmailIndex = G.emailIndex!!.toInt()  // 사용자 인덱스
+        )
+        call.enqueue(object : Callback<List<SharedMemoData>> {
             override fun onResponse(call: Call<List<SharedMemoData>>, response: Response<List<SharedMemoData>>) {
                 if (response.isSuccessful) {
                     memoList = response.body() ?: emptyList()  // memoList 업데이트
                     memoList.let {
+                        Log.d("YourlistFragment112", " 메모 수: ${memoList.size}")
 
-                        updateRecyclerView(it)
+                        // 각각의 게시물의 isBookmarked, isFollowing, isLiked 값을 로그로 출력
+                         memoList.forEach { memo ->
+                         Log.d("YourlistFragment112", "Memo ID: ${memo.id_memo}, isBookmarked: ${memo.isBookmarked}, isFollowing: ${memo.isFollowing}, isLiked: ${memo.isLiked}")
+                         }
+                        updateRecyclerView(it, resetAdapter = true)  // 어댑터 초기화
                         if (isMapVisible) {
                             updateMarkers(it)  // 지도 상태일 때 마커 업데이트
                         }
                     }
                 } else {
-                    Log.e("YourlistFragment", "Failed to load nearby memos: ${response.errorBody()?.string()}")
+                    Log.e("loadMemosByLocation", "Failed to load memos: ${response.errorBody()?.string()}")
                 }
-                isLoading = false
             }
 
             override fun onFailure(call: Call<List<SharedMemoData>>, t: Throwable) {
-                Log.e("YourlistFragment", "Network error: ${t.message}")
-                isLoading = false
+                Log.e("loadMemosByLocation", "Network error: ${t.message}")
             }
         })
     }
@@ -407,7 +395,7 @@ class YourlistFragment : Fragment() {
                         // memoList.forEach { memo ->
                         // Log.d("YourlistFragment997", "Memo ID: ${memo.id_memo}, isBookmarked: ${memo.isBookmarked}, isFollowing: ${memo.isFollowing}, isLiked: ${memo.isLiked}")
                         // }
-                        updateRecyclerView(it)
+                        updateRecyclerView(it, resetAdapter = true)  // 어댑터 초기화
                         if (isMapVisible) {
                             updateMarkers(it)  // 지도 상태일 때 마커 업데이트
                         }
@@ -459,15 +447,16 @@ class YourlistFragment : Fragment() {
     }
 
     // 리사이클러뷰 업데이트 함수
-    private fun updateRecyclerView(memoList: List<SharedMemoData>) {
-        if (currentPage == 1) {
-            // ToggleViewModel을 sharedMemoAdapter에 전달
-            sharedMemoAdapter = SharedMemoAdapter(memoList.toMutableList(), toggleViewModel)  // ToggleViewModel 전달
-            binding.recyclerView.adapter = sharedMemoAdapter
-        } else {
-            sharedMemoAdapter.addMemoList(memoList) // 기존 어댑터에 데이터 추가
+    private fun updateRecyclerView(memoList: List<SharedMemoData>, resetAdapter: Boolean = false) {
+        if (resetAdapter || currentPage == 1) {
+            sharedMemoAdapter.setMemoList(memoList)  // 어댑터의 데이터를 새롭게 설정
+        }
+        else {
+            sharedMemoAdapter.addMemoList(memoList)  // 기존 어댑터에 데이터 추가
         }
     }
+
+
 
     // Fragment가 일시 중지 상태로 들어갈 때 호출
     override fun onPause() {
@@ -480,4 +469,6 @@ class YourlistFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
+
 }

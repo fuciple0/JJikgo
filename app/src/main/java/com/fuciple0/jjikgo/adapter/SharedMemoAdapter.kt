@@ -177,4 +177,10 @@ class SharedMemoAdapter(
         notifyItemRangeInserted(startPosition, newMemos.size)  // 추가된 항목만 새로고침
     }
 
+    // setMemoList 메서드 추가: 새로운 데이터로 어댑터 갱신
+    fun setMemoList(newMemoList: List<SharedMemoData>) {
+        sharedMemoList.clear()  // 기존 데이터 삭제
+        sharedMemoList.addAll(newMemoList)  // 새로운 데이터 추가
+        notifyDataSetChanged()  // UI 갱신
+    }
 }
