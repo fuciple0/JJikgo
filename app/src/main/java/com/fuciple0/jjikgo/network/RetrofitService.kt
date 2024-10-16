@@ -165,6 +165,15 @@ interface RetrofitService {
 
 
 
+    // 팔로우한 사람의 메모를 최신순으로 불러오기
+    @GET("Jjikgo/getMemos_Sorted_By_Follow.php")
+    fun getMemosSortedByFollow(
+        @Query("limit") limit: Int,
+        @Query("page") page: Int,
+        @Query("loggedInEmailIndex") loggedInEmailIndex: Int
+    ): Call<List<SharedMemoData>>
+
+
 
 
 

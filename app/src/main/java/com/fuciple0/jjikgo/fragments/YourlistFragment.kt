@@ -147,6 +147,7 @@ class YourlistFragment : Fragment() {
 //    }
 
 
+
     // RecyclerView 스크롤 리스너 설정 함수
     private fun setupRecyclerViewScrollListener() {
         binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -164,14 +165,15 @@ class YourlistFragment : Fragment() {
                         currentPage++
                         when (currentSortOption) {
                             0 -> loadMemosSortedByDate(currentPage)
-                            1 -> loadMemosSortedByDate(currentPage)
-                            2 -> loadMemosSortedByDate(currentPage)
+
+
                         }
                     }
                 }
             }
         })
     }
+
 
     // 지도에 있는 마커들을 모두 삭제하는 함수
     private fun clearMarkers() {
@@ -322,7 +324,7 @@ class YourlistFragment : Fragment() {
                 when (position) {
                     0 -> loadMemosSortedByDate(currentPage)
                     1 -> loadMemosByLocation(G.mylocation?.latitude!!.toDouble(), G.mylocation?.longitude!!.toDouble(), currentPage)
-                    2 -> loadMemosSortedByDate(currentPage)
+                    2 -> loadMemosSortedByFollow(currentPage)
                 }
             }
             override fun onNothingSelected(parent: AdapterView<*>) {
@@ -358,6 +360,7 @@ class YourlistFragment : Fragment() {
                          memoList.forEach { memo ->
                          Log.d("YourlistFragment112", "Memo ID: ${memo.id_memo}, isBookmarked: ${memo.isBookmarked}, isFollowing: ${memo.isFollowing}, isLiked: ${memo.isLiked}")
                          }
+                        currentSortOption = 1
                         updateRecyclerView(it, resetAdapter = true)  // 어댑터 초기화
                         if (isMapVisible) {
                             updateMarkers(it)  // 지도 상태일 때 마커 업데이트
@@ -395,6 +398,7 @@ class YourlistFragment : Fragment() {
                         // memoList.forEach { memo ->
                         // Log.d("YourlistFragment997", "Memo ID: ${memo.id_memo}, isBookmarked: ${memo.isBookmarked}, isFollowing: ${memo.isFollowing}, isLiked: ${memo.isLiked}")
                         // }
+                        currentSortOption = 0
                         updateRecyclerView(it, resetAdapter = true)  // 어댑터 초기화
                         if (isMapVisible) {
                             updateMarkers(it)  // 지도 상태일 때 마커 업데이트
@@ -413,6 +417,42 @@ class YourlistFragment : Fragment() {
             }
         })
     }
+
+    // 팔로우한 사람의 메모를 최신순으로 불러오는 메서드
+    private fun loadMemosSortedByFollow(page: Int) {
+        if (isLoading) return
+        isLoading = true
+
+        val retrofit = RetrofitHelper.getRetrofitInstance("http://fuciple0.dothome.co.kr/")
+        val retrofitService = retrofit.create(RetrofitService::class.java)
+
+        val call = retrofitService.getMemosSortedByFollow(pageSize, page, G.emailIndex!!.toInt())
+        call.enqueue(object : Callback<List<SharedMemoData>> {
+            override fun onResponse(call: Call<List<SharedMemoData>>, response: Response<List<SharedMemoData>>) {
+                if (response.isSuccessful) {
+                    memoList = response.body() ?: emptyList()  // memoList 업데이트
+                    memoList.let {
+                        Log.d("YourlistFragment", "Follow_총 가져온 메모 수: ${memoList.size}")
+                        currentSortOption = 3
+                        updateRecyclerView(it, resetAdapter = true)  // 어댑터 초기화
+                        if (isMapVisible) {
+                            updateMarkers(it)  // 지도 상태일 때 마커 업데이트
+                        }
+                    }
+                } else {
+                    Log.e("YourlistFragment", "Failed to load followed memos: ${response.errorBody()?.string()}")
+                }
+                isLoading = false
+            }
+
+            override fun onFailure(call: Call<List<SharedMemoData>>, t: Throwable) {
+                Log.e("YourlistFragment", "Network error: ${t.message}")
+                isLoading = false
+            }
+        })
+    }
+
+
 
     // 평점 높은 순으로 메모를 불러오는 메서드
     private fun loadMemosByRating(page: Int) {
