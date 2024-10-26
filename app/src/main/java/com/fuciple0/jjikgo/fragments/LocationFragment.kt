@@ -19,10 +19,12 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
+import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
@@ -325,21 +327,18 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
             true
         }
 
-        // 이미지 주소가 있을 경우 Glide로 이미지 로드 및 원형 변환 적용
+        // 이미지 주소가 있을 경우 Glide로 이미지 로드 및 곡률 처리 적용
         if (memo.img_memo != null && memo.img_memo.isNotEmpty()) {
             val fullImageUrl = "http://fuciple0.dothome.co.kr/Jjikgo/${memo.img_memo}"
 
             Glide.with(this)
                 .asBitmap()
                 .load(fullImageUrl)
-                .apply(
-                    RequestOptions()
-                        .circleCrop()  // 원형 변환
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)  // 모든 이미지 캐시
-                        .override(85, 85))  // 비트맵 크기 조정
+                .apply(RequestOptions.bitmapTransform(RoundedCorners(20)))  // 곡률 적용
+                .override(85, 85)  // 비트맵 크기 조정
                 .into(object : CustomTarget<Bitmap>() {
                     override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
-                        marker.icon = OverlayImage.fromBitmap(resource)  // 마커에 이미지 설정
+                        marker.icon = OverlayImage.fromBitmap(resource)
                     }
 
                     override fun onLoadCleared(placeholder: Drawable?) {
@@ -348,9 +347,20 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
                 })
         } else {
             // 이미지가 없을 경우 기본 마커 이미지 설정
-            val defaultBitmap = BitmapFactory.decodeResource(resources, R.drawable.default_marker)
-            val resizedBitmap = Bitmap.createScaledBitmap(defaultBitmap, 85, 85, false)
-            marker.icon = OverlayImage.fromBitmap(resizedBitmap)  // 기본 마커 이미지 설정
+            Glide.with(this)
+                .asBitmap()
+                .load(R.drawable.default_marker)  // 기본 이미지 로드
+                .apply(RequestOptions.bitmapTransform(RoundedCorners(20)))  // 곡률 적용
+                .override(100, 100)  // 비트맵 크기 조정
+                .into(object : CustomTarget<Bitmap>() {
+                    override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                        marker.icon = OverlayImage.fromBitmap(resource)
+                    }
+
+                    override fun onLoadCleared(placeholder: Drawable?) {
+                        // 필요 시 처리
+                    }
+                })
         }
     }
 
