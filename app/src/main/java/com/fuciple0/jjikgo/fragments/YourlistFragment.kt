@@ -453,39 +453,6 @@ class YourlistFragment : Fragment() {
     }
 
 
-
-    // 평점 높은 순으로 메모를 불러오는 메서드
-    private fun loadMemosByRating(page: Int) {
-        if (isLoading) return
-        isLoading = true
-
-        val retrofit = RetrofitHelper.getRetrofitInstance("http://fuciple0.dothome.co.kr/")
-        val retrofitService = retrofit.create(RetrofitService::class.java)
-
-        val call = retrofitService.getMemosSortedByRating(pageSize, page, G.emailIndex!!.toInt())
-        call.enqueue(object : Callback<List<SharedMemoData>> {  // 타입을 SharedMemoData로 변경
-            override fun onResponse(call: Call<List<SharedMemoData>>, response: Response<List<SharedMemoData>>) {
-                if (response.isSuccessful) {
-                    memoList = response.body() ?: emptyList()  // memoList 업데이트
-                    memoList.let {
-                        Log.d("YourlistFragment78", "Rating_총 가져온 메모 수: ${memoList.size}")
-                        updateRecyclerView(it)
-                        if (isMapVisible) {
-                            updateMarkers(it)  // 지도 상태일 때 마커 업데이트
-                        }
-                    }
-                } else {
-                    Log.e("YourlistFragment", "Failed to load memos by rating: ${response.errorBody()?.string()}")
-                }
-                isLoading = false
-            }
-            override fun onFailure(call: Call<List<SharedMemoData>>, t: Throwable) {
-                Log.e("YourlistFragment", "Network error: ${t.message}")
-                isLoading = false
-            }
-        })
-    }
-
     // 리사이클러뷰 업데이트 함수
     private fun updateRecyclerView(memoList: List<SharedMemoData>, resetAdapter: Boolean = false) {
         if (resetAdapter || currentPage == 1) {

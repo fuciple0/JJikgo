@@ -179,6 +179,8 @@ class LocationFragment : Fragment(), OnMapReadyCallback {
         this.naverMap = naverMap
         naverMap.locationSource = locationSource
         naverMap.uiSettings.isLocationButtonEnabled = false
+        naverMap.setLayerGroupEnabled(NaverMap.LAYER_GROUP_BUILDING, false);
+        naverMap.setLightness(0.3f);
 
         // SharedPreferences에서 emailIndex 값을 가져옴
         val sharedPreferences: SharedPreferences = requireContext().getSharedPreferences("login_prefs", Context.MODE_PRIVATE)
